@@ -14,8 +14,8 @@ the highly inefficient and unreadable code which I had written during my naive d
 The idea is to use OOPs to build a simple data processing tool for pulsar data.
 
 ## Table of Contents
-1. [MBR to Dynamic Spectrum](#Heading-1)
-2. [Dynamic Spectrum to Time Series](#Heading-2)
+1. [MBR to Dynamic Spectrum](#heading-1)
+2. [Dynamic Spectrum to Time Series](#heading-2)
 
 
 ## 1. MBR to Dynamic Spectrum
@@ -46,6 +46,28 @@ dfghjk
 dsfghjk
 
 
-
-
 sadsfdgfhgjh
+
+
+- [Heading](#heading)
+- [Heading](#heading-1)
+- [Heading](#heading-2)
+
+
+# Heading levels
+
+> This is a fixture to test heading levels
+
+<!-- toc -->
+
+## Heading
+
+This is an h1 heading
+
+## Heading
+
+This is an h1 heading
+
+## Heading
+
+This is an h1 heading
