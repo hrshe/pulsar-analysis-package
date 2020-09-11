@@ -14,7 +14,7 @@ the highly inefficient and unreadable code which I had written during my naive d
 The idea is to use OOPs to build a simple data processing tool for pulsar data.
 
 ## Table of Contents
-1. [MBRtoDynamicSpectrum](#MBRtoDynamicSpectrum)
+1. [MBRtoDynamicSpectrum](#1.MBRtoDynamicSpectrum)
 2. [DynamicSpectrumtoTimeSeries](#DynamicSpectrumtoTimeSeries)
 
 
@@ -35,7 +35,7 @@ dfg
 test end
 
 
-## 2. DynamicSpectrumtoTimeSeries 
+## 2. Dynamic Spectrum to Time Series 
 
 
 sa
