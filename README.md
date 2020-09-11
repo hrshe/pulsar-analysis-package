@@ -14,11 +14,11 @@ the highly inefficient and unreadable code which I had written during my naive d
 The idea is to use OOPs to build a simple data processing tool for pulsar data.
 
 ## Table of Contents
-1. [MBRtoDynamicSpectrum](#1.MBRtoDynamicSpectrum)
-2. [DynamicSpectrumtoTimeSeries](#DynamicSpectrumtoTimeSeries)
+1. [MBRtoDynamicSpectrum](#1-mbr-to-dynamic-spectrum)
+2. [DynamicSpectrumtoTimeSeries](#2-dynamic-spectrum-to-time-series)
 
 
-## 1. MBRtoDynamicSpectrum
+## 1. MBR to Dynamic Spectrum
 MBR stands for multi band receiver.
 
 
@@ -48,26 +48,3 @@ dsfghjk
 
 sadsfdgfhgjh
 
-
-- [Heading](#heading)
-- [Heading](#heading-1)
-- [Heading](#heading-2)
-
-
-# Heading levels
-
-> This is a fixture to test heading levels
-
-<!-- toc -->
-
-## Heading
-
-This is an h1 heading
-
-## Heading
-
-This is an h1 heading
-
-## Heading
-
-This is an h1 heading
