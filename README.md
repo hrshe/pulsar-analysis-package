@@ -7,11 +7,16 @@ Institute   : BITS Pilani, Pilani Campus & Raman Research Institue
 ```
 
 ###Description:
+
 This package was developed during my time in Raman Research Institute while working
 with Prof Avinash Deshpande (*'desh'*). This is an attempt to systematically refactor
 the highly inefficient and unreadable code which I had written during my naive days.
 
-The idea is to use OOPs to build a simple data processing tool for pulsar data.
+The objective of the 4 month thesis project was to study the radio emissions of a drifter
+pulsar at different bands to better understand the magnetosphere. More information can be found 
+in my Thesis Report ([Drifting_Subpulse_Thesis.pdf](Drifting_Subpulse_Thesis.pdf))
+
+The idea here is to use OOPs to build a simple data processing tool for pulsar data.
 
 ## Table of Contents
 1. [MBR to Dynamic Spectrum](#1-mbr-to-dynamic-spectrum)
@@ -26,15 +31,3 @@ test end
 
 
 ## 2. Dynamic Spectrum to Time Series 
-
-
-sa
-dfghjk
-
-
-
-dsfghjk
-
-
-sadsfdgfhgjh
-
