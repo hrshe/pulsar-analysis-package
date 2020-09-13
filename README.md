@@ -6,7 +6,7 @@ Co-Guide    : Dr. Kaushar Vaidya
 Institute   : BITS Pilani, Pilani Campus & Raman Research Institue  
 ```
 
-###Description:
+## Description:
 
 This package was developed during my time in Raman Research Institute while working
 with Prof Avinash Deshpande (*'desh'*). This is an attempt to systematically refactor
@@ -24,10 +24,25 @@ The idea here is to use OOPs to build a simple data processing tool for pulsar d
 
 
 ## 1. MBR to Dynamic Spectrum
-MBR stands for Multi Band Receiver.
+The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the MBR along with a header are saved in '.mbr' files.
+These '.mbr' data files are to be placed in [MBRData](MBRData) directory for processing.
+
+![mbrPacket](readmeImages/mbrPacket.png)
+*MBR packet header*
+
+<p align="center">
+  <img src="readmeImages/mbrPacket.png" />
+</p>
 
 
-test end
+Each mbr data file is made up of 2,027,520 mbr packets. The mbr packet is 1056 bytes long. 
+The first 32 bytes in mbr packet is the header and stores information like Observation ID, Source Name, Local Oscillator 
+(LO) frequency, GPS count, packet count, etc. and the structure of its header is shown in Fig 3.1. The 1024 bytes after the 
+header contain raw voltage data sampled at 33 MHz. Of these 1024, 512 bytes are for X polarization and Y polarization each.
+
+Each observation band is 16 MHz wide and the central frequency of this band can be calculated from LO frequency by using the formula RF = LO ± IF. Of these two values select the one which lies in the band. The LO, IF and resulting RF (central frequency) values obtained for 8 channels is given in Table 3.2
+
+The recorded data also suffer from missing packets. These missing packets can be considered as bad data and are flagged (given a value -9999 in dynamic spectrum) so that they can be avoided while calculating time sequence. The missing packets were detected by keeping a count of number of packets read and comparing that to the packet number present in the header of current packet being read. The missing data can be seen as dark blue solid patches in dynamic spectra (Fig 3.4).
 
 
 ## 2. Dynamic Spectrum to Time Series 
