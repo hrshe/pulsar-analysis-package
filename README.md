@@ -69,5 +69,31 @@ The recorded data also suffer from missing packets. These missing packets can be
 The missing packets were detected by keeping a count of number of packets read and comparing that to the packet number 
 present in the header of current packet being read.
 
+#### Step 1: Packet Level Synchronization
+For analysing signals received across all 10 frequency bands, it is extremely important that we synchronize the data 
+from each band. This would ensure that we compare and study pulse signals from different channels having the same origin
+at the pulsar.
+
+For this, the header of each packet is analysed and the GPS count, packet number and GPS pulse for each packet is recorded. 
+GPS count is the number of seconds after 00:00hrs on the day of observation. The count is updated every second. GPS pulse 
+is a very short (nano seconds) pulse. If this pulse is ‘high’ while writing the header, 1 is recorded in the GPS bit. Else 
+zero is recorded. Plot the GPS count vs Packet Number for all packets and fit a line through those with ‘high’ GPS bit. 
+Let us call this line ‘A’. Refer Fig 1.2
+
+<p align="center">
+  <img src="readmeImages/synchronization.png"/>
+</p>
+<p align="center">
+  <a>Table 1.2: GPS counts vs Packet Number</a>
+  <br><br>
+  <a>The packet with ‘high’ GPS pulse in header is marked in red</a>
+  <br><br>
+</p>
+
+Such analysis is done for all 9 channels. Now taking the first occurrence of GPS count as a reference start for our 
+observation, note the corresponding packet number on the line ‘A’ for all channels. Treat this packet number as the 
+first packet for our observations in all corresponding channels.
+
+The synchronization code used was developed by Harsh Grover and is present in [synchronization](AnalysisPackages/synchronization) package.
 
 ## 2. Dynamic Spectrum to Time Series 
