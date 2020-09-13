@@ -28,10 +28,10 @@ The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). 
 These '.mbr' data files are to be placed in [MBRData](MBRData) directory for processing.
 
 ![mbrPacket](readmeImages/mbrPacket.png)
-*MBR packet header*
+**
 
 <p align="center">
-  <img src="readmeImages/mbrPacket.png" />
+  <img src="readmeImages/mbrPacket.png" title="Figure 1.1: MBR packet header"/>
 </p>
 
 
