@@ -34,6 +34,11 @@ These '.mbr' data files are to be placed in [MBRData directory](MBRData) channel
   |--> ch04
   ...
 
+The '.mbr' file name should be of the form "ch01_B0834+06_20090725_114903_000.mbr" where:
+* First 4 characters (ch01) tell the channel number
+* Next 8 characters (B0834+06) tell the pulsar name 
+* Next 15 characters (20090725_114903) tell the date and time of observation (2009/07/25 11:49:03)
+* Last characters tell the sequence number
 
 Each mbr data file is made up of 2,027,520 mbr packets. The mbr packet is 1056 bytes long. 
 The first 32 bytes in mbr packet is the header which stores information like Observation ID, Source Name, Local Oscillator 
