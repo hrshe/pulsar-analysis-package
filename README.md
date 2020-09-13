@@ -27,12 +27,12 @@ The idea here is to use OOPs to build a simple data processing tool for pulsar d
 The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the MBR along with a header are saved in '.mbr' files.
 These '.mbr' data files are to be placed in [MBRData directory](MBRData) channel wise (as shown below) for processing.
 
-<ins>MBRData</ins>
-  |--> ch01
-  |--> ch02
-  |--> ch03
-  |--> ch04
-  ...
+<ins>MBRData</ins>  
+    |--> ch01  
+    |--> ch02  
+    |--> ch03  
+    |--> ch04  
+    ...
 
 The '.mbr' file name should be of the form "ch01_B0834+06_20090725_114903_000.mbr" where:
 * First 4 characters (ch01) tell the channel number
