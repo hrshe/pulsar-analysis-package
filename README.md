@@ -25,7 +25,20 @@ The idea here is to use OOPs to build a simple data processing tool for pulsar d
 
 ## 1. MBR to Dynamic Spectrum
 The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the MBR along with a header are saved in '.mbr' files.
-These '.mbr' data files are to be placed in [MBRData](MBRData) directory for processing.
+These '.mbr' data files are to be placed in [MBRData directory](MBRData) channel wise (as shown below) for processing.
+
+<ins>MBRData</ins>
+  |--> ch01
+  |--> ch02
+  |--> ch03
+  |--> ch04
+  ...
+
+
+Each mbr data file is made up of 2,027,520 mbr packets. The mbr packet is 1056 bytes long. 
+The first 32 bytes in mbr packet is the header which stores information like Observation ID, Source Name, Local Oscillator 
+(LO) frequency, GPS count, packet count, etc. and the structure of its header is shown in Figure 1.1. The 1024 bytes after the 
+header contain raw voltage data sampled at 33 MHz. Of these 1024, 512 bytes are for X polarization and Y polarization each.
 
 <p align="center">
   <img src="readmeImages/mbrPacket.png"/>
@@ -34,11 +47,6 @@ These '.mbr' data files are to be placed in [MBRData](MBRData) directory for pro
   <a>Figure 1.1: MBR packet header</a>
   <br><br>
 </p>
-
-Each mbr data file is made up of 2,027,520 mbr packets. The mbr packet is 1056 bytes long. 
-The first 32 bytes in mbr packet is the header and stores information like Observation ID, Source Name, Local Oscillator 
-(LO) frequency, GPS count, packet count, etc. and the structure of its header is shown in Fig 3.1. The 1024 bytes after the 
-header contain raw voltage data sampled at 33 MHz. Of these 1024, 512 bytes are for X polarization and Y polarization each.
 
 Each observation band is 16 MHz wide and the central frequency of this band can be calculated from LO frequency by using the formula RF = LO ± IF. Of these two values select the one which lies in the band. The LO, IF and resulting RF (central frequency) values obtained for 8 channels is given in Table 3.2
 
