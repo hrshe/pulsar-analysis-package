@@ -53,9 +53,21 @@ header contain raw voltage data sampled at 33 MHz. Of these 1024, 512 bytes are 
   <br><br>
 </p>
 
-Each observation band is 16 MHz wide and the central frequency of this band can be calculated from LO frequency by using the formula RF = LO ± IF. Of these two values select the one which lies in the band. The LO, IF and resulting RF (central frequency) values obtained for 8 channels is given in Table 3.2
+Each observation band is 16 MHz wide and the central frequency of this band can be calculated from LO frequency by using 
+the formula RF = LO ± IF. Of these two values select the one which lies in the band. The LO, IF and resulting RF (central 
+frequency) values obtained for 8 channels is given in Table 1.1
+<p align="center">
+  <img src="readmeImages/centralFrequency.png"/>
+</p>
+<p align="center">
+  <a>Table 1.1: Central Frequency for channels</a>
+  <br><br>
+</p>
 
-The recorded data also suffer from missing packets. These missing packets can be considered as bad data and are flagged (given a value -9999 in dynamic spectrum) so that they can be avoided while calculating time sequence. The missing packets were detected by keeping a count of number of packets read and comparing that to the packet number present in the header of current packet being read. The missing data can be seen as dark blue solid patches in dynamic spectra (Fig 3.4).
+The recorded data also suffer from missing packets. These missing packets can be considered as bad data and are flagged 
+(given a value -9999 in dynamic spectrum) so that they can be avoided while calculating time sequence. 
+The missing packets were detected by keeping a count of number of packets read and comparing that to the packet number 
+present in the header of current packet being read.
 
 
 ## 2. Dynamic Spectrum to Time Series 
