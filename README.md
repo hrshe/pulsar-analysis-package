@@ -27,13 +27,13 @@ The idea here is to use OOPs to build a simple data processing tool for pulsar d
 The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the MBR along with a header are saved in '.mbr' files.
 These '.mbr' data files are to be placed in [MBRData](MBRData) directory for processing.
 
-![mbrPacket](readmeImages/mbrPacket.png)
-**
-
 <p align="center">
-  <img src="readmeImages/mbrPacket.png" title="Figure 1.1: MBR packet header"/>
+  <img src="readmeImages/mbrPacket.png"/>
 </p>
-
+<p align="center">
+  <a>Figure 1.1: MBR packet header</a>
+  <br><br>
+</p>
 
 Each mbr data file is made up of 2,027,520 mbr packets. The mbr packet is 1056 bytes long. 
 The first 32 bytes in mbr packet is the header and stores information like Observation ID, Source Name, Local Oscillator 
