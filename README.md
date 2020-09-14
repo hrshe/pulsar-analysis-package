@@ -24,7 +24,8 @@ The idea here is to use OOPs to build a simple data processing tool for pulsar d
 
 
 ## 1. MBR to Dynamic Spectrum
-The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the MBR along with a header are saved in '.mbr' files.
+The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the 
+MBR along with a header are saved in '.mbr' files.
 These '.mbr' data files are to be placed in [MBRData directory](MBRData) channel wise (as shown below) for processing.
 
 <ins>MBRData</ins>  
@@ -94,6 +95,7 @@ Such analysis is done for all 9 channels. Now taking the first occurrence of GPS
 observation, note the corresponding packet number on the line ‘A’ for all channels. Treat this packet number as the 
 first packet for our observations in all corresponding channels.
 
-The synchronization code used was developed by Harsh Grover and is present in [synchronization](AnalysisPackages/synchronization) package.
+The synchronization code used was developed by Harsh Grover and is present in 
+[synchronization](AnalysisPackages/synchronization) package.
 
 ## 2. Dynamic Spectrum to Time Series 
