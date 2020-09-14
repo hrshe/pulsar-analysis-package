@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Manually added directories and files
+*.mbr
+
 # Distribution / packaging
 .idea
 .Python
