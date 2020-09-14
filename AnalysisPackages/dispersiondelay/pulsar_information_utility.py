@@ -1,7 +1,9 @@
 """
 To perform the following tasks:
-1) get central frequency and populate in resources
-2) get packet number delay for dispersion and populate in resources
+1) get central frequency and option to populate in resources
+2) get packet number delay for dispersion and option to populate in resources
+
+Also holds the information in resources to be used in actual code
 """
 import os
 from pathlib import Path
