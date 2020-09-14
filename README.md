@@ -3,7 +3,8 @@
 Author      : Hrishikesh Shetgaokar(hrishikesh036@gmail.com)
 Guide       : Prof. Avinash Deshpande
 Co-Guide    : Dr. Kaushar Vaidya
-Institute   : BITS Pilani, Pilani Campus & Raman Research Institue  
+Institute   : BITS Pilani, Pilani Campus & Raman Research Institue 
+Reviewers   : Akhil Jaini, Aleena Baby
 ```
 
 ## Description:
