@@ -104,7 +104,8 @@ same for only one channel.
 For the code to run properly, MBR data files should be present channel wise in [MBRData](MBRData) directory.
 It accepts mbr file name details without the sequence number as input command line argument.
 Example command to run from project root for mbr data B0834+06_20090725_114903:
-```python3 AnalysisPackages/synchronization/SynchronizationAll.py B0834+06_20090725_114903
+```
+python3 AnalysisPackages/synchronization/SynchronizationAll.py B0834+06_20090725_114903
 ```
 Output:
 Channel number and first packet of synchronization for all channels is saved in the path:
