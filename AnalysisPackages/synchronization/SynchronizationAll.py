@@ -1,3 +1,16 @@
+"""
+Packet level synchronization for all channels.
+
+Input:
+MBR data files should be present channel wise in MBRData directory.
+Accepts mbr file name details without the sequence number as input.
+Example command to run from project root for mbr data B0834+06_20090725_114903:
+> python3 AnalysisPackages/synchronization/SynchronizationAll.py B0834+06_20090725_114903
+
+Output:
+Channel number and first packet of synchronization for all channels is saved in the path:
+        AnalysisPackages/resources/ChannelVsFirstPacket_B0834+06_20090725_114903.txt
+"""
 import os
 import sys
 from pathlib import Path
@@ -8,9 +21,9 @@ date = psrDetails[9:17]
 time = psrDetails[18:22]
 
 print("")
-print("PSR name 	: " + psr_name)
-print("Date 	: " + date)
-print("Time	: " + time)
+print("PSR name : " + psr_name)
+print("Date 	 : " + date)
+print("Time	 : " + time)
 print()
 
 dirname = Path(__file__).parent.parent.absolute()

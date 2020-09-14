@@ -1,7 +1,16 @@
-'''
-Packet level synchronization
-Based on code written by Harsh Grover
-'''
+"""
+Packet level synchronization for one channel.
+
+Input:
+Channel number is extracted from input file name.
+Accepts mbr file name without the sequence number as input.
+Example command run from project root for mbr data ch01_B0834+06_20090725_114903:
+> python3 AnalysisPackages/synchronization/synchronization.py MBRData/ch01/ch01_B0834+06_20090725_114903
+
+Output:
+Channel number and first packet of synchronization is saved in the path:
+        AnalysisPackages/resources/ChannelVsFirstPacket_B0834+06_20090725_114903.txt
+"""
 import sys
 from os.path import getsize
 from os.path import isfile
@@ -37,7 +46,7 @@ def linear_fit(a, b):
     return a_new, b_new
 
 
-####  START  ####
+#  START  #
 dirname = Path(__file__).parent.parent.absolute()
 file_name = sys.argv[1]
 psrDetails = file_name[18:42]
@@ -80,9 +89,9 @@ for n in range(1):
         f_p_blip = []
 
         file = open(file_name + st + ".mbr", "rb")
-        while (i < size):
+        while i < size:
             file.read(24)
-            if (i != 26):
+            if i != 26:
                 file.read(1024)
             temp = file.read(2)
             fpga[q % 2] = int.from_bytes(temp, byteorder='big')  # reading FPGA mon
@@ -90,10 +99,10 @@ for n in range(1):
             gps[q % 2] = int.from_bytes(temp1, byteorder='big')  # reading GPS count
             temp3 = file.read(4)
             p_num[q % 2] = int.from_bytes(temp3, byteorder='big')  # reading packet count
-            if (gps[q % 2] - gps[(q + 1) % 2] == 1):  # when increment in gps# and pkt#
+            if gps[q % 2] - gps[(q + 1) % 2] == 1:  # when increment in gps# and pkt#
                 g_blip.append(gps[q % 2])
                 p_blip.append(p_num[q % 2])
-                if (fpga[q % 2] != fpga[(q + 1) % 2]):
+                if fpga[q % 2] != fpga[(q + 1) % 2]:
                     f_g_blip.append(gps[q % 2])
                     f_p_blip.append(p_num[q % 2])
             i += 1056
@@ -127,7 +136,7 @@ for n in range(1):
         st = '_' + int2str(j, 3)
 
         if (not (isfile(file_name + st + ".mbr"))):
-            print("\n\t\t---For Ch " + file_name[2:4] + "---")
+            print("\n\t\t---For Ch " + str(channelNumber) + "---")
             print("P_Num for first transition:\t\t\t" + str(P_BLIP_c[0]))
             print("Estimate of P_Num for first transition(by GPS count vs Pkt count fitting):\t\t" + str(P_BLIP_new[0]))
             print("Estimate of P_Num for first transition(by FPGA blip vs Pkt count fitting):\t\t" + str(
