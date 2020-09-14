@@ -93,13 +93,10 @@ for n in range(1):
             file.read(24)
             if i != 26:
                 file.read(1024)
-            temp = file.read(2)
-            fpga[q % 2] = int.from_bytes(temp, byteorder='big')  # reading FPGA mon
-            temp1 = file.read(2)
-            gps[q % 2] = int.from_bytes(temp1, byteorder='big')  # reading GPS count
-            temp3 = file.read(4)
-            p_num[q % 2] = int.from_bytes(temp3, byteorder='big')  # reading packet count
-            if gps[q % 2] - gps[(q + 1) % 2] == 1:  # when increment in gps# and pkt#
+            fpga[q % 2] = int.from_bytes(file.read(2), byteorder='big')  # reading FPGA mon
+            gps[q % 2] = int.from_bytes(file.read(2), byteorder='big')  # reading GPS count
+            p_num[q % 2] = int.from_bytes(file.read(4), byteorder='big')  # reading packet count
+            if gps[q % 2] - gps[(q + 1) % 2] == 1:                  # when increment in gps# and pkt#
                 g_blip.append(gps[q % 2])
                 p_blip.append(p_num[q % 2])
                 if fpga[q % 2] != fpga[(q + 1) % 2]:
