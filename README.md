@@ -21,6 +21,7 @@ The idea here is to use OOPs to build a simple data processing tool for pulsar d
 
 ## Table of Contents
 1. [MBR to Dynamic Spectrum](#1-mbr-to-dynamic-spectrum)
+      * [Step 1: Packet Level Synchronization](#step-1-packet-level-synchronization)
 2. [Dynamic Spectrum to Time Series](#2-dynamic-spectrum-to-time-series)
 
 
