@@ -88,24 +88,22 @@ for n in range(1):
         f_g_blip = []
         f_p_blip = []
 
-        file = open(file_name + st + ".mbr", "rb")
-        while i < size:
-            file.read(24)
-            if i != 26:
-                file.read(1024)
-            fpga[q % 2] = int.from_bytes(file.read(2), byteorder='big')  # reading FPGA mon
-            gps[q % 2] = int.from_bytes(file.read(2), byteorder='big')  # reading GPS count
-            p_num[q % 2] = int.from_bytes(file.read(4), byteorder='big')  # reading packet count
-            if gps[q % 2] - gps[(q + 1) % 2] == 1:                  # when increment in gps# and pkt#
-                g_blip.append(gps[q % 2])
-                p_blip.append(p_num[q % 2])
-                if fpga[q % 2] != fpga[(q + 1) % 2]:
-                    f_g_blip.append(gps[q % 2])
-                    f_p_blip.append(p_num[q % 2])
-            i += 1056
-            q += 1
-
-        file.close()
+        with open(file_name + st + ".mbr", "rb") as file:
+            while i < size:
+                file.read(24)
+                if i != 26:
+                    file.read(1024)
+                fpga[q % 2] = int.from_bytes(file.read(2), byteorder='big')  # reading FPGA mon
+                gps[q % 2] = int.from_bytes(file.read(2), byteorder='big')  # reading GPS count
+                p_num[q % 2] = int.from_bytes(file.read(4), byteorder='big')  # reading packet count
+                if gps[q % 2] - gps[(q + 1) % 2] == 1:                  # when increment in gps# and pkt#
+                    g_blip.append(gps[q % 2])
+                    p_blip.append(p_num[q % 2])
+                    if fpga[q % 2] != fpga[(q + 1) % 2]:
+                        f_g_blip.append(gps[q % 2])
+                        f_p_blip.append(p_num[q % 2])
+                i += 1056
+                q += 1
 
         s = slope(g_blip, p_blip)
 
@@ -143,11 +141,12 @@ for n in range(1):
             int_part = temp_line_func(G_BLIP_new[0])
             print("Sample in " + str(int_part) + "th packet:\t\t" + str(512 * frac_part) + "\n")
 
-            output_file = open(str(dirname) + "/resources/ChannelVsFirstPacket_" + psrDetails + ".txt", "a")
-            a = np.zeros((1, 2))
-            a[0, 0] = channelNumber
-            a[0, 1] = temp_line_func(int(G_BLIP_new[0]))
-            np.savetxt(output_file, a, fmt='%d')
+            with open(str(dirname) + "/resources/ChannelVsFirstPacket_" + psrDetails + ".txt", "a") as output_file:
+                a = np.zeros((1, 2))
+                a[0, 0] = channelNumber
+                a[0, 1] = temp_line_func(int(G_BLIP_new[0]))
+                np.savetxt(output_file, a, fmt='%d')
+
             if (plot_graph):
                 plt.figure()
                 plt.plot(G_BLIP_c, P_BLIP_c, "ro")
