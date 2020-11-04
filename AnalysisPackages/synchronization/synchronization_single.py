@@ -1,5 +1,6 @@
 """
 Packet level synchronization for one channel.
+Also populates sampling frequency and first packet in config.txt and resources file.
 
 Input:
 Channel number is extracted from input file name.

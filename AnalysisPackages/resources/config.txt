@@ -15,21 +15,21 @@ n_bins = 3000
 central_frequency = 120.0
 sync_first_packet = 25573722
 sampling_frequency = 31.25
-sync_dispersion_delay_packet =
+sync_dispersion_delay_packet = 
 
 [channel-2-specific]
 central_frequency = 172.0
 sync_first_packet = 25573722
 sampling_frequency = 31.25
-sync_dispersion_delay_packet =
+sync_dispersion_delay_packet = 
 
 [channel-3-specific]
 central_frequency = 233.0
 sync_first_packet = 27005851
-sampling_frequency = 32.999999
+sampling_frequency = 33.0
 
 [channel-4-specific]
 central_frequency = 330.0
 sync_first_packet = 27005851
-sampling_frequency = 32.999999
+sampling_frequency = 33.0
 
