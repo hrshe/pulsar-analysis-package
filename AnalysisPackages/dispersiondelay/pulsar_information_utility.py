@@ -36,6 +36,12 @@ class PulsarInformationUtility:
     def __init__(self, mbr_pulsar_name_date_time):
         self.psr_name = mbr_pulsar_name_date_time
 
+    """
+    returns a dictionary of channel_number and central_frequency as key(int):value(float) pairs
+    
+    eg: {1: 120, 2: 172, 3: 233, 4: 330}
+    cf.get(3) gives 233.0.
+    """
     def all_channels_central_frequency(self, populate_config=True, populate_resources_file=False):
         root_dirname = str(Path(__file__).parent.parent.parent.absolute())
         config_filename = root_dirname + '/AnalysisPackages/resources/config.txt'
@@ -74,7 +80,7 @@ class PulsarInformationUtility:
             file = open(mbr_filename, "rb")
             file.read(22)
             lo_freq = int.from_bytes(file.read(2), byteorder='big')
-            central_freq = lo_freq - get_intermediate_frequency(channel_number)
+            central_freq = float(lo_freq - get_intermediate_frequency(channel_number))
             print("ch:0" + str(channel_number) + "	LO: " + str(lo_freq) + "	CF: "
                   + str(central_freq))
             if populate_resources_file:
@@ -84,8 +90,10 @@ class PulsarInformationUtility:
                 config_set_central_frequency(channel_number, central_freq)
             output_array.append([channel_number, central_freq])
         config_write(config_filename)
-        return output_array
+        return dict(output_array)
 
 
 psr = PulsarInformationUtility("B0834+06_20090725_114903")
-print(np.array(psr.all_channels_central_frequency(False, False)))
+cf = psr.all_channels_central_frequency(False, False)
+print(cf)
+print(cf.get(3))
