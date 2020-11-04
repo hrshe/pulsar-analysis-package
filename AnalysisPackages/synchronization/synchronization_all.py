@@ -25,7 +25,6 @@ def main(psrDetails):
     print("PSR name : " + psr_name)
     print("Date 	 : " + date)
     print("Time	 : " + time)
-    print()
 
     dirname = Path(__file__).parent.parent.absolute()
     output_file = open(str(dirname)+"/resources/ChannelVsFirstPacket_" + psrDetails + ".txt", "w")
@@ -42,7 +41,8 @@ def main(psrDetails):
         print("###############################################")
         print("##  Synchronization Task Starting for Ch:0"+str(channelNumber)+"  ##")
         print("###############################################")
-        synchronization_single.main("MBRData/ch0" + str(channelNumber) + "/ch0" + str(channelNumber) + "_" + psrDetails)
+        synchronization_single.main("MBRData/ch0" + str(channelNumber) + "/ch0" + str(channelNumber) + "_" + psrDetails,
+                                    populate_config=True)
         print("################################################")
         print("##  Synchronization Task Completed for Ch:0"+str(channelNumber)+"  ##")
         print("################################################")

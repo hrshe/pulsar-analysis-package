@@ -7,7 +7,6 @@ Also holds the information in resources to be used in actual code
 """
 import os
 from pathlib import Path
-import numpy as np
 import configparser
 
 config = configparser.ConfigParser()
