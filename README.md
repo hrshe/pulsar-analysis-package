@@ -100,7 +100,7 @@ first packet for our observations in all corresponding channels.
 The synchronization code used is present in [SynchronizationAll.py](AnalysisPackages/synchronization/SynchronizationAll.py).
 This code calculates first packet of synchronization for all channels and populate the data in 
 [ChannelVsFirstPacket_\*PSRDetails\*.txt](AnalysisPackages/resources/ChannelVsFirstPacket_B0834+06_20090725_114903.txt).
-This code internally calls [synchronization.py](AnalysisPackages/synchronization/synchronization_single.py) which calculates the 
+This code internally calls [synchronization_single.py](AnalysisPackages/synchronization/synchronization_single.py) which calculates the 
 same for only one channel.
 
 For the code to run properly, MBR data files should be present channel wise in [MBRData](MBRData) directory.
