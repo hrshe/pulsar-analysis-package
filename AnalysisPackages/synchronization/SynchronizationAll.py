@@ -5,7 +5,7 @@ Input:
 MBR data files should be present channel wise in MBRData directory.
 Accepts mbr file name details without the sequence number as input.
 Example command to run from project root for mbr data B0834+06_20090725_114903:
-> python3 AnalysisPackages/synchronization/SynchronizationAll.py B0834+06_20090725_114903
+> python3 -m AnalysisPackages.synchronization.SynchronizationAll B0834+06_20090725_114903
 
 Output:
 Channel number and first packet of synchronization for all channels is saved in the path:
@@ -13,6 +13,7 @@ Channel number and first packet of synchronization for all channels is saved in 
 """
 import os
 import sys
+from AnalysisPackages.synchronization import synchronization_single
 from pathlib import Path
 
 def main(psrDetails):
@@ -41,10 +42,7 @@ def main(psrDetails):
         print("###############################################")
         print("##  Synchronization Task Starting for Ch:0"+str(channelNumber)+"  ##")
         print("###############################################")
-
-        os.system(
-            "python3 "+str(dirname)+"/synchronization/synchronization.py MBRData/ch0" + str(channelNumber) + "/ch0" + str(
-                channelNumber) + "_" + psrDetails)
+        synchronization_single.main("MBRData/ch0" + str(channelNumber) + "/ch0" + str(channelNumber) + "_" + psrDetails)
         print("################################################")
         print("##  Synchronization Task Completed for Ch:0"+str(channelNumber)+"  ##")
         print("################################################")
