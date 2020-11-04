@@ -42,27 +42,15 @@ class PulsarInformationUtility:
     eg: {1: 120, 2: 172, 3: 233, 4: 330}
     cf.get(3) gives 233.0.
     """
+
     def all_channels_central_frequency(self, populate_config=True, populate_resources_file=False):
         root_dirname = str(Path(__file__).parent.parent.parent.absolute())
         config_filename = root_dirname + '/AnalysisPackages/resources/config.txt'
         output_filename = (root_dirname + "/AnalysisPackages/resources/ChannelVsDispersionPacketDelay_"
                            + self.psr_name + ".txt")
 
-        if populate_config:
-            config.read(config_filename)
-            print("populate_config set to True. " + config_filename + " will be updated")
-        else:
-            print("populate_config set to False. " + config_filename + " will not be updated")
-
-        if populate_resources_file:
-            output_filename = str(root_dirname +
-                                  "/AnalysisPackages/resources/ChannelVsDispersionPacketDelay_"
-                                  + self.psr_name + ".txt")
-            with open(output_filename, "w") as output_file:
-                output_file.truncate(0)
-            print("populate_resources_file set to True. " + output_filename + " will be updated\n\n")
-        else:
-            print("populate_resources_file set to False. " + output_filename + " will not be updated\n\n")
+        self.populate_resources_setup(config_filename, output_filename, populate_config,
+                                      populate_resources_file, root_dirname)
 
         output_array = []
         input_dirname = str(root_dirname + "/MBRData")
@@ -83,14 +71,40 @@ class PulsarInformationUtility:
             central_freq = float(lo_freq - get_intermediate_frequency(channel_number))
             print("ch:0" + str(channel_number) + "	LO: " + str(lo_freq) + "	CF: "
                   + str(central_freq))
-            if populate_resources_file:
-                with open(output_filename, "a") as output_file:
-                    output_file.write(str(channel_number) + "\t" + str(central_freq) + "\n")
-            if populate_config:
-                config_set_central_frequency(channel_number, central_freq)
+
+            self.populate_resources(central_freq, channel_number, output_filename, populate_config,
+                                    populate_resources_file)
             output_array.append([channel_number, central_freq])
-        config_write(config_filename)
+
+        if populate_config:
+            config_write(config_filename)
+
         return dict(output_array)
+
+    def populate_resources(self, central_freq, channel_number, output_filename, populate_config,
+                           populate_resources_file):
+        if populate_resources_file:
+            with open(output_filename, "a") as output_file:
+                output_file.write(str(channel_number) + "\t" + str(central_freq) + "\n")
+        if populate_config:
+            config_set_central_frequency(channel_number, central_freq)
+
+    def populate_resources_setup(self, config_filename, output_filename, populate_config, populate_resources_file,
+                                 root_dirname):
+        if populate_config:
+            config.read(config_filename)
+            print("populate_config set to True. " + config_filename + " will be updated")
+        else:
+            print("populate_config set to False. " + config_filename + " will not be updated")
+        if populate_resources_file:
+            output_filename = str(root_dirname +
+                                  "/AnalysisPackages/resources/ChannelVsDispersionPacketDelay_"
+                                  + self.psr_name + ".txt")
+            with open(output_filename, "w") as output_file:
+                output_file.truncate(0)
+            print("populate_resources_file set to True. " + output_filename + " will be updated\n\n")
+        else:
+            print("populate_resources_file set to False. " + output_filename + " will not be updated\n\n")
 
 
 psr = PulsarInformationUtility("B0834+06_20090725_114903")
