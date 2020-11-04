@@ -1,0 +1,29 @@
+[pulsar-config]
+p = 1273
+dm = 12.45
+test = 3
+
+[general-config]
+n_packet_integration = 60
+last_sequence_number = 3
+n_channels = 256
+
+[folding-config]
+n_bins = 3000
+
+[channel-1-specific]
+central_frequency = 232
+sampling_frequency = 33
+sync_first_packet = 
+sync_dispersion_delay_packet = 
+
+[channel-2-specific]
+central_frequency = 232
+sampling_frequency = 33
+sync_first_packet = 
+sync_dispersion_delay_packet = 
+
+[channel-3-specific]
+central_frequency = 232
+sampling_frequency = 33
+
