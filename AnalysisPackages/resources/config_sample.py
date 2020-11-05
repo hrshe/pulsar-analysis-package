@@ -2,7 +2,8 @@ import numpy as np
 import configparser
 from pathlib import Path
 
-from AnalysisPackages.resources.bcolors import bcolors
+from AnalysisPackages.utilities.bcolors import bcolors
+from AnalysisPackages.utilities.pulsar_information_utility import PulsarInformationUtility, BandSpecificConfig
 
 config = configparser.ConfigParser()
 
@@ -65,54 +66,61 @@ def populate_all_channels_sync_dispersion_delay_packet():
         config_set_sync_dispersion_delay_packet_frequency(i, int(time_delay[i - 1]))
     config_write(config_filename)
 
-root_dirname = str(Path(__file__).parent.parent.parent.absolute())
-config_filename = root_dirname + '/AnalysisPackages/resources/config.txt'
-read_config(config_filename)
 
-band_specific = {f'band_{n}': dict(config.items(f'channel-{n}-specific')) for n in range(1, 10)}
-print(band_specific)
+# config_filename = root_dirname + '/AnalysisPackages/resources/config.txt'
+# read_config(config_filename)
+#
+# band_specific = {f'band_{n}': dict(config.items(f'channel-{n}-specific')) for n in range(1, 10)}
+# print(band_specific)
+#
+psr = PulsarInformationUtility("B0834+06_20090725_114903")
+band_data: BandSpecificConfig = psr.band[2]
 
+band_data.sampling_frequency
+print(band_data.sampling_frequency)
+print(psr.dm)
+print(psr.psr_name)
 
-print(f"{bcolors.HEADER}\nconfig file path: {config_filename}")
-print(f"current config file contents: \n{bcolors.ENDC}")
-with open(config_filename, "r") as config_file:
-    print(config_file.read())
-while (True):
-    valid_option = True
-    print(f"{bcolors.HEADER}Verify contents and select options to populate missing contents")
-    print(f"1. Populate central frequency for all bands in config.txt")
-    print(f"2. Populate sampling frequency and first packet for all bands in config.txt")
-    print(f"3. Populate packets to skip for dispersion delay synchronization across bands in config.txt")
-    print(f"4. Do all{bcolors.ENDC}")
-    print(f"{bcolors.OKGREEN}5. Exit(enter Q or 5){bcolors.ENDC}")
-    print(
-        f"{bcolors.OKBLUE}NOTE: sampling frequency and central frequency are required in config.txt for dispersion delay "
-        f"synchronization(Option 3){bcolors.ENDC}")
-
-    print("Enter your option: ")
-    option = input()
-
-    if option.lower() == 'q' or (option.isnumeric() and int(option) == 5):
-        print("Bye!")
-        break
-    elif option.isnumeric():
-        if int(option) == 1:
-            print(f"executing option {option}\n")
-        elif int(option) == 2:
-            print(f"executing option {option}\n")
-        elif int(option) == 3:
-            print(f"executing option {option}\n")
-        elif int(option) == 4:
-            print(f"executing option {option}\n")
-        else:
-            valid_option = False
-    else:
-        valid_option = False
-
-    if not valid_option:
-        print(f"Invalid input: \"{option}\"\nEnter valid input(1,2,3,4,5,Q,q)")
-
-    if valid_option:
-        print(f"Option {option} execution complete. Printing new config\n")
-        with open(config_filename, "r") as config_file:
-            print(config_file.read())
+# print(f"{bcolors.HEADER}\nconfig file path: {config_filename}")
+# print(f"current config file contents: \n{bcolors.ENDC}")
+# with open(config_filename, "r") as config_file:
+#     print(config_file.read())
+# while (True):
+#     valid_option = True
+#     print(f"{bcolors.HEADER}Verify contents and select options to populate missing contents")
+#     print(f"1. Populate central frequency for all bands in config.txt")
+#     print(f"2. Populate sampling frequency and first packet for all bands in config.txt")
+#     print(f"3. Populate packets to skip for dispersion delay synchronization across bands in config.txt")
+#     print(f"4. Do all{bcolors.ENDC}")
+#     print(f"{bcolors.OKGREEN}5. Exit(enter Q or 5){bcolors.ENDC}")
+#     print(
+#         f"{bcolors.OKBLUE}NOTE: sampling frequency and central frequency are required in config.txt for dispersion delay "
+#         f"synchronization(Option 3){bcolors.ENDC}")
+#
+#     print("Enter your option: ")
+#     option = input()
+#
+#     if option.lower() == 'q' or (option.isnumeric() and int(option) == 5):
+#         print("Bye!")
+#         break
+#     elif option.isnumeric():
+#         if int(option) == 1:
+#             print(f"executing option {option}\n")
+#         elif int(option) == 2:
+#             print(f"executing option {option}\n")
+#         elif int(option) == 3:
+#             print(f"executing option {option}\n")
+#         elif int(option) == 4:
+#             print(f"executing option {option}\n")
+#         else:
+#             valid_option = False
+#     else:
+#         valid_option = False
+#
+#     if not valid_option:
+#         print(f"Invalid input: \"{option}\"\nEnter valid input(1,2,3,4,5,Q,q)")
+#
+#     if valid_option:
+#         print(f"Option {option} execution complete. Printing new config\n")
+#         with open(config_filename, "r") as config_file:
+#             print(config_file.read())

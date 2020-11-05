@@ -71,15 +71,11 @@ def linear_fit(a, b):
 
 
 def main(file_name, populate_config=True):
-    #  START  #
     dirname = Path(__file__).parent.parent.absolute()
     config_filename = str(dirname) + '/resources/config.txt'
-    psrDetails = file_name[18:42]
-    channelNumber = int(file_name[15:17])
+    psr_details = file_name[18:42]
+    channel_number = int(file_name[15:17])
     plot_graph = False
-    # True if \
-    # (input("Do you want to plot packet_num vs gps_count graph?(yes/no) 		:")).lower() == "yes" \
-    # else False
 
     if populate_config:
         config.read(config_filename)
@@ -93,12 +89,6 @@ def main(file_name, populate_config=True):
         F_G_BLIP = []
         F_P_BLIP = []
         stop = []
-        SLOPE = []
-        stability = []
-        stability_fpga = []
-        conv = []
-        conv_fpga = []
-        julian_day = []
         j = 0
         st = '_' + int2str(j, 3)
 
@@ -109,11 +99,11 @@ def main(file_name, populate_config=True):
             print("Reading file " + file_name + st + ".mbr")
 
             size = getsize(file_name + st + ".mbr")
-            i = 26  # start of every gps count and packet number
+            i = 26
             q = 0
-            fpga = np.empty(2)  # Think it is to detect missing packets
-            gps = np.empty(2)  # Think it is to detect missing packets
-            p_num = np.empty(2)  # Think it is to detect missing packets
+            fpga = np.empty(2)
+            gps = np.empty(2)
+            p_num = np.empty(2)
             g_blip = []
             p_blip = []
             f_g_blip = []
@@ -136,11 +126,6 @@ def main(file_name, populate_config=True):
                     i += 1056
                     q += 1
 
-            s = slope(g_blip, p_blip)
-
-            g_blip_new, p_blip_new = linear_fit(g_blip, p_blip)
-            f_g_blip_new, f_p_blip_new = linear_fit(f_g_blip, f_p_blip)
-
             G_BLIP.append(g_blip)
             P_BLIP.append(p_blip)
             F_G_BLIP.append(f_g_blip)
@@ -150,7 +135,6 @@ def main(file_name, populate_config=True):
             P_BLIP_c = double_arr_to_list(P_BLIP)
             F_G_BLIP_c = double_arr_to_list(F_G_BLIP)
             F_P_BLIP_c = double_arr_to_list(F_P_BLIP)
-            SLOPE_c = double_arr_to_list(SLOPE)
 
             G_BLIP_new, P_BLIP_new = linear_fit(G_BLIP_c, P_BLIP_c)
             F_G_BLIP_new, F_P_BLIP_new = linear_fit(F_G_BLIP_c, F_P_BLIP_c)
@@ -161,8 +145,8 @@ def main(file_name, populate_config=True):
             j += 1
             st = '_' + int2str(j, 3)
 
-            if (not (isfile(file_name + st + ".mbr"))):
-                print("\n\t\t---For Ch " + str(channelNumber) + "---")
+            if not (isfile(file_name + st + ".mbr")):
+                print("\n\t\t---For Ch " + str(channel_number) + "---")
                 print("P_Num for first transition:\t\t\t" + str(P_BLIP_c[0]))
                 print("Estimate of P_Num for first transition(by GPS count vs Pkt count fitting):\t\t" + str(
                     P_BLIP_new[0]))
@@ -176,16 +160,16 @@ def main(file_name, populate_config=True):
                 int_part = temp_line_func(G_BLIP_new[0])
                 print("Sample in " + str(int_part) + "th packet:\t\t" + str(512 * frac_part) + "\n")
 
-                config_set_config(channelNumber, first_packet, round(float(sampling_frequency/10**6), 2))
+                config_set_config(channel_number, first_packet, round(float(sampling_frequency/10**6), 2))
                 config_write(config_filename)
 
-                with open(str(dirname) + "/resources/ChannelVsFirstPacket_" + psrDetails + ".txt", "a") as output_file:
+                with open(str(dirname) + "/resources/ChannelVsFirstPacket_" + psr_details + ".txt", "a") as output_file:
                     a = np.zeros((1, 2))
-                    a[0, 0] = channelNumber
+                    a[0, 0] = channel_number
                     a[0, 1] = temp_line_func(int(G_BLIP_new[0]))
                     np.savetxt(output_file, a, fmt='%d')
 
-                if (plot_graph):
+                if plot_graph:
                     plt.figure()
                     plt.plot(G_BLIP_c, P_BLIP_c, "ro")
                     plt.plot(G_BLIP_new, P_BLIP_new)
