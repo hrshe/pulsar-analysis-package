@@ -1,9 +1,13 @@
 """
 To perform the following tasks:
-1) get central frequency and option to populate in resources
-2) get packet number delay for dispersion and option to populate in resources
+1) get central frequency and populate in config.txt
+2) get sampling frequency and reference first packet for synchronization and populate in config.txt
+23 get packet number delay for dispersion and populate in config.txt
 
-Also holds the information in resources to be used in actual code
+Also holds the information from config.txt as instance variables to be used in actual code.
+
+Usage:
+python3 -m AnalysisPackages.utilities.pulsar_information_utility B0834+06_20090725_114903
 """
 import os
 import sys
