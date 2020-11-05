@@ -1,5 +1,6 @@
 """
 Packet level synchronization for one channel.
+Also populates sampling frequency and first packet in config.txt and resources file.
 
 Input:
 Channel number is extracted from input file name.
@@ -17,6 +18,29 @@ from os.path import isfile
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
+import configparser
+
+config = configparser.ConfigParser()
+
+
+def config_write(filename):
+    print("\nwriting to "+filename+"\n")
+    with open(filename, 'w') as configfile:
+        config.write(configfile)
+
+
+def config_set_config(channel_number, sync_first_packet, sampling_frequency):
+    try:
+        config.set('channel-' + str(channel_number) + '-specific', 'sync_first_packet', str(sync_first_packet))
+    except configparser.NoSectionError:
+        print('[channel-' + str(channel_number) + '-specific] section not found. Creating new section')
+        config['channel-' + str(channel_number) + '-specific'] = {'sync_first_packet': str(sync_first_packet)}
+
+    try:
+        config.set('channel-' + str(channel_number) + '-specific', 'sampling_frequency', str(sampling_frequency))
+    except configparser.NoSectionError:
+        print('[channel-' + str(channel_number) + '-specific] section not found. Creating new section')
+        config['channel-' + str(channel_number) + '-specific'] = {'sampling_frequency': str(sampling_frequency)}
 
 
 def int2str(number, digits):
@@ -46,15 +70,22 @@ def linear_fit(a, b):
     return a_new, b_new
 
 
-def main(file_name):
+def main(file_name, populate_config=True):
     #  START  #
     dirname = Path(__file__).parent.parent.absolute()
+    config_filename = str(dirname) + '/resources/config.txt'
     psrDetails = file_name[18:42]
     channelNumber = int(file_name[15:17])
     plot_graph = False
     # True if \
     # (input("Do you want to plot packet_num vs gps_count graph?(yes/no) 		:")).lower() == "yes" \
     # else False
+
+    if populate_config:
+        config.read(config_filename)
+        print("populate_config set to True. " + config_filename + " will be updated")
+    else:
+        print("populate_config set to False. " + config_filename + " will not be updated")
 
     for n in range(1):
         G_BLIP = []
@@ -135,13 +166,18 @@ def main(file_name):
                 print("P_Num for first transition:\t\t\t" + str(P_BLIP_c[0]))
                 print("Estimate of P_Num for first transition(by GPS count vs Pkt count fitting):\t\t" + str(
                     P_BLIP_new[0]))
+                first_packet = int(temp_line_func(G_BLIP_new[0]))
+                sampling_frequency = int(np.mean(slope(F_G_BLIP_new, F_P_BLIP_new)) * 512)
                 print("Estimate of P_Num for first transition(by FPGA blip vs Pkt count fitting):\t\t" + str(
-                    temp_line_func(G_BLIP_new[0])))
+                    first_packet))
                 print("\nEstimated Sampling Freq.(FPGA Blip):\t\t" + str(
-                    np.mean(slope(F_G_BLIP_new, F_P_BLIP_new)) * 512))
+                    sampling_frequency))
                 frac_part = temp_line_func(G_BLIP_new[0]) - int(temp_line_func(G_BLIP_new[0]))
                 int_part = temp_line_func(G_BLIP_new[0])
                 print("Sample in " + str(int_part) + "th packet:\t\t" + str(512 * frac_part) + "\n")
+
+                config_set_config(channelNumber, first_packet, round(float(sampling_frequency/10**6), 2))
+                config_write(config_filename)
 
                 with open(str(dirname) + "/resources/ChannelVsFirstPacket_" + psrDetails + ".txt", "a") as output_file:
                     a = np.zeros((1, 2))
@@ -160,8 +196,6 @@ def main(file_name):
 
                 break
 
-    exit()
-
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv[1], False)

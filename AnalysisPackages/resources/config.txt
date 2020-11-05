@@ -1,7 +1,7 @@
 [pulsar-config]
-p = 1273
+period = 1273
 dm = 12.45
-test = 3
+n_bands = 9
 
 [general-config]
 n_packet_integration = 60
@@ -12,18 +12,52 @@ n_channels = 256
 n_bins = 3000
 
 [channel-1-specific]
-central_frequency = 232
-sampling_frequency = 33
-sync_first_packet = 
-sync_dispersion_delay_packet = 
+central_frequency = 120.0
+sync_first_packet = 25573722
+sampling_frequency = 31.25
+sync_dispersion_delay_packet = 196264
 
 [channel-2-specific]
-central_frequency = 232
-sampling_frequency = 33
-sync_first_packet = 
-sync_dispersion_delay_packet = 
+central_frequency = 172.0
+sync_first_packet = 25573722
+sampling_frequency = 31.25
+sync_dispersion_delay_packet = 98006
 
 [channel-3-specific]
-central_frequency = 232
-sampling_frequency = 33
+central_frequency = 233.0
+sync_first_packet = 27005851
+sampling_frequency = 33.0
+sync_dispersion_delay_packet = 53406
+
+[channel-4-specific]
+central_frequency = 330.0
+sync_first_packet = 27005851
+sampling_frequency = 33.0
+sync_dispersion_delay_packet = 26019
+
+[channel-5-specific]
+central_frequency = 420.0
+sampling_frequency = 33.0
+sync_dispersion_delay_packet = 15353
+
+[channel-6-specific]
+central_frequency = 618.0
+sampling_frequency = 33.0
+sync_dispersion_delay_packet = 5935
+
+[channel-7-specific]
+central_frequency = 730.0
+sync_first_packet = 3615
+sampling_frequency = 33.0
+sync_dispersion_delay_packet = 3615
+
+[channel-8-specific]
+central_frequency = 810.0
+sampling_frequency = 33.0
+sync_dispersion_delay_packet = 2508
+
+[channel-9-specific]
+central_frequency = 1170.0
+sampling_frequency = 33.0
+sync_dispersion_delay_packet = 0
 
