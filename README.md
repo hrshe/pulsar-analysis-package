@@ -22,7 +22,8 @@ The idea here is to use OOPs to build a simple data processing tool for pulsar d
 ## Table of Contents
 1. [MBR to Dynamic Spectrum](#1-mbr-to-dynamic-spectrum)
       * [Step 1: Packet Level Synchronization](#step-1-packet-level-synchronization)
-2. [Dynamic Spectrum to Time Series](#2-dynamic-spectrum-to-time-series)
+2. [Pulsar Information Utility](#2-pulsar-information-utility)
+3. [Dynamic Spectrum to Time Series](#3-dynamic-spectrum-to-time-series)
 
 
 ## 1. MBR to Dynamic Spectrum
@@ -114,5 +115,29 @@ Channel number and first packet of synchronization for all channels is saved in 
 [ChannelVsFirstPacket_\*PSRDetails\*.txt](AnalysisPackages/resources/ChannelVsFirstPacket_B0834+06_20090725_114903.txt)
 (AnalysisPackages/resources/ChannelVsFirstPacket_B0834+06_20090725_114903.txt)
 
+## 2. Pulsar Information Utility
+Idea behind this utility is to have a class which can be used to hold all configuration parameters and pulsar properties 
+at a single place. This class also has methods to populate the following band specific observation properties in 
+[config.txt](AnalysisPackages/resources/config.txt):
+* Central frequency
+* Sampling frequency
+* First packet for synchronization
+* Dispersion delay(in terms of number of packets) for synchronization
 
-## 2. Dynamic Spectrum to Time Series 
+#####Usage:
+Make sure that the [config.txt](AnalysisPackages/resources/config.txt) file is present in correct resources 
+directory((AnalysisPackages/resources/)). It accepts mbr file name details without the sequence number as 
+input command line argument. Example command to run from project root for mbr data B0834+06_20090725_114903:
+```
+python3 -m AnalysisPackages.dispersiondelay.pulsar_information_utility B0834+06_20090725_114903
+```
+There'll be a prompt to choose aa option to populate config.txt.
+```
+1. Populate central frequency for all bands in config.txt
+2. Populate sampling frequency and first packet for all bands in config.txt
+3. Populate packets to skip for dispersion delay synchronization across bands in config.txt
+4. Do all
+5. Exit(enter Q or 5)
+```
+Choose a desired option by entering corresponding option value(1,2,3,4,5,Q or q)
+## 3. Dynamic Spectrum to Time Series 
