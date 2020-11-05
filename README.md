@@ -131,7 +131,7 @@ input command line argument. Example command to run from project root for mbr da
 ```
 python3 -m AnalysisPackages.dispersiondelay.pulsar_information_utility B0834+06_20090725_114903
 ```
-There'll be a prompt to choose aa option to populate config.txt.
+There'll be a prompt to choose a option to populate config.txt.
 ```
 1. Populate central frequency for all bands in config.txt
 2. Populate sampling frequency and first packet for all bands in config.txt
