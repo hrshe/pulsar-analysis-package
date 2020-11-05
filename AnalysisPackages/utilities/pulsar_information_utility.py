@@ -11,12 +11,10 @@ python3 -m AnalysisPackages.utilities.pulsar_information_utility B0834+06_200907
 """
 import os
 import sys
-
+import configparser
 import numpy as np
 from pathlib import Path
-import configparser
-
-from AnalysisPackages.resources.bcolors import bcolors
+from AnalysisPackages.utilities.bcolors import bcolors
 from AnalysisPackages.synchronization import synchronization_all
 
 config = configparser.ConfigParser()
@@ -113,13 +111,39 @@ def print_run_options():
     print("Enter your option: ")
 
 
+class BandSpecificConfig(object):
+    def __init__(self, config_dictionary, band):
+        try:
+            self.central_frequency = float(config_dictionary['central_frequency'])
+        except KeyError:
+            print(f"{bcolors.WARNING}'central_frequency' key not found for band {band} while creating BandSpecific "
+                  f"instance... {bcolors.ENDC}")
+
+        try:
+            self.sync_first_packet = int(config_dictionary['sync_first_packet'])
+        except KeyError:
+            print(f"{bcolors.WARNING}'sync_first_packet' key not found for band {band} while creating BandSpecific "
+                  f"instance... {bcolors.ENDC}")
+
+        try:
+            self.sampling_frequency = float(config_dictionary['sampling_frequency'])
+        except KeyError:
+            print(f"{bcolors.WARNING}'sampling_frequency' key not found for band {band} while creating BandSpecific "
+                  f"instance... {bcolors.ENDC}")
+
+        try:
+            self.sync_dispersion_delay_packet = int(config_dictionary['sync_dispersion_delay_packet'])
+        except KeyError:
+            print(f"{bcolors.WARNING}'sync_dispersion_delay_packet' key not found for band {band} while creating "
+                  f"BandSpecific instance... {bcolors.ENDC}")
+
 class PulsarInformationUtility:
     def __init__(self, mbr_pulsar_name_date_time):
         self.root_dirname = str(Path(__file__).parent.parent.parent.absolute())
         self.config_filename = self.root_dirname + '/AnalysisPackages/resources/config.txt'
         config.read(self.config_filename)
-        self.psr_name_date_tine = mbr_pulsar_name_date_time
-        self.psr_name = mbr_pulsar_name_date_time[:9]
+        self.psr_name_date_time = mbr_pulsar_name_date_time
+        self.psr_name = mbr_pulsar_name_date_time[:8]
 
         self.period = float(config.get('pulsar-config', 'period'))
         self.dm = float(config.get('pulsar-config', 'dm'))
@@ -129,12 +153,13 @@ class PulsarInformationUtility:
         self.last_sequence_number = int(config.get('general-config', 'last_sequence_number'))
         self.n_channels = int(config.get('general-config', 'n_channels'))
 
+        self.band = None
         self.set_band_specific_from_config()
 
     def set_band_specific_from_config(self):
         read_config(self.config_filename)
         try:
-            self.band_specific = {f'band{n}': dict(config.items(f'channel-{n}-specific')) for n in range(1, 10)}
+            self.band = {n: BandSpecificConfig(dict(config.items(f'channel-{n}-specific')), n) for n in range(1, 10)}
         except configparser.NoSectionError:
             print(f"{bcolors.WARNING}\nChannel specific section missing... Check config.txt or use run() method "
                   f"of this class to repopulate config.txt{bcolors.ENDC}")
@@ -145,6 +170,7 @@ class PulsarInformationUtility:
     eg: {1: 120, 2: 172, 3: 233, 4: 330}
     cf.get(3) gives 233.0.
     """
+
     def populate_all_channels_central_frequency_in_config(self, populate_config_flag=True,
                                                           populate_resources_file_flag=False):
         print(f"{bcolors.HEADER}Populating central frequency...\n{bcolors.ENDC}")
@@ -250,6 +276,7 @@ def main(file_name):
     psr = PulsarInformationUtility(file_name)  # "B0834+06_20090725_114903"
     print(psr.dm)
     psr.run()
+
 
 if __name__ == '__main__':
     main(sys.argv[1])
