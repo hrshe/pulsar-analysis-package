@@ -129,7 +129,7 @@ Make sure that the [config.txt](AnalysisPackages/resources/config.txt) file is p
 directory((AnalysisPackages/resources/)). It accepts mbr file name details without the sequence number as 
 input command line argument. Example command to run from project root for mbr data B0834+06_20090725_114903:
 ```
-python3 -m AnalysisPackages.dispersiondelay.pulsar_information_utility B0834+06_20090725_114903
+python3 -m AnalysisPackages.utilities.pulsar_information_utility B0834+06_20090725_114903
 ```
 There'll be a prompt to choose a option to populate config.txt.
 ```
