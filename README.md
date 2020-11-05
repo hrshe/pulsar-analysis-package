@@ -124,7 +124,7 @@ at a single place. This class also has methods to populate the following band sp
 * First packet for synchronization
 * Dispersion delay(in terms of number of packets) for synchronization
 
-#####Usage:
+Usage:
 Make sure that the [config.txt](AnalysisPackages/resources/config.txt) file is present in correct resources 
 directory((AnalysisPackages/resources/)). It accepts mbr file name details without the sequence number as 
 input command line argument. Example command to run from project root for mbr data B0834+06_20090725_114903:
