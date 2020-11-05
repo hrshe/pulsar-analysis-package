@@ -6,9 +6,13 @@ To perform the following tasks:
 Also holds the information in resources to be used in actual code
 """
 import os
+import sys
+
 import numpy as np
 from pathlib import Path
 import configparser
+
+from AnalysisPackages.resources.bcolors import bcolors
 from AnalysisPackages.synchronization import synchronization_all
 
 config = configparser.ConfigParser()
@@ -60,9 +64,9 @@ def populate_resources_setup(psr_name, config_filename, output_filename, populat
         print("populate_resources_file set to False. " + output_filename + " will not be updated\n\n")
 
 
-def populate_config(filename):
+def read_config(filename):
     config.read(filename)
-    print("\n\n" + filename + " will be updated")
+    print("\n\n" + filename + " config file read into configparser")
 
 
 def time_delay_2_col_delay(t):
@@ -92,14 +96,44 @@ def config_set_sync_dispersion_delay_packet_frequency(channel_number, sync_dispe
             'sync_dispersion_delay_packet': str(sync_dispersion_delay_packet)}
 
 
+def print_run_options():
+    print(f"{bcolors.HEADER}Verify contents and select options to populate missing contents")
+    print(f"1. Populate central frequency for all bands in config.txt")
+    print(f"2. Populate sampling frequency and first packet for all bands in config.txt")
+    print(f"3. Populate packets to skip for dispersion delay synchronization across bands in config.txt")
+    print(f"4. Do all{bcolors.ENDC}")
+    print(f"{bcolors.OKGREEN}5. Exit(enter Q or 5){bcolors.ENDC}")
+    print(
+        f"{bcolors.OKBLUE}NOTE: sampling frequency and central frequency are required in config.txt for "
+        f"dispersion delay synchronization(Option 3){bcolors.ENDC}")
+    print("Enter your option: ")
+
+
 class PulsarInformationUtility:
     def __init__(self, mbr_pulsar_name_date_time):
         self.root_dirname = str(Path(__file__).parent.parent.parent.absolute())
         self.config_filename = self.root_dirname + '/AnalysisPackages/resources/config.txt'
         config.read(self.config_filename)
-        self.psr_name = mbr_pulsar_name_date_time
+        self.psr_name_date_tine = mbr_pulsar_name_date_time
+        self.psr_name = mbr_pulsar_name_date_time[:9]
+
+        self.period = float(config.get('pulsar-config', 'period'))
         self.dm = float(config.get('pulsar-config', 'dm'))
-        self.n_channels = int(config.get('pulsar-config', 'n_channels'))
+        self.n_bands = int(config.get('pulsar-config', 'n_bands'))
+
+        self.n_packet_integration = int(config.get('general-config', 'n_packet_integration'))
+        self.last_sequence_number = int(config.get('general-config', 'last_sequence_number'))
+        self.n_channels = int(config.get('general-config', 'n_channels'))
+
+        self.set_band_specific_from_config()
+
+    def set_band_specific_from_config(self):
+        read_config(self.config_filename)
+        try:
+            self.band_specific = {f'band{n}': dict(config.items(f'channel-{n}-specific')) for n in range(1, 10)}
+        except configparser.NoSectionError:
+            print(f"{bcolors.WARNING}\nChannel specific section missing... Check config.txt or use run() method "
+                  f"of this class to repopulate config.txt{bcolors.ENDC}")
 
     """
     returns a dictionary of channel_number and central_frequency as key(int):value(float) pairs
@@ -107,15 +141,16 @@ class PulsarInformationUtility:
     eg: {1: 120, 2: 172, 3: 233, 4: 330}
     cf.get(3) gives 233.0.
     """
-
-    def populate_all_channels_central_frequency_in_config(self, populate_config=True, populate_resources_file=False):
+    def populate_all_channels_central_frequency_in_config(self, populate_config_flag=True,
+                                                          populate_resources_file_flag=False):
+        print(f"{bcolors.HEADER}Populating central frequency...\n{bcolors.ENDC}")
         root_dirname = self.root_dirname
         config_filename = self.config_filename
         output_filename = (root_dirname + "/AnalysisPackages/resources/ChannelVsDispersionPacketDelay_"
-                           + self.psr_name + ".txt")
+                           + self.psr_name_date_tine + ".txt")
 
-        populate_resources_setup(self.psr_name, config_filename, output_filename, populate_config,
-                                 populate_resources_file, root_dirname)
+        populate_resources_setup(self.psr_name_date_tine, config_filename, output_filename, populate_config_flag,
+                                 populate_resources_file_flag, root_dirname)
 
         output_array = []
         input_dirname = str(root_dirname + "/MBRData")
@@ -128,7 +163,7 @@ class PulsarInformationUtility:
                 continue
 
             mbr_filename = input_dirname + "/ch0" + str(channel_number) + "/ch0" + str(
-                channel_number) + "_" + self.psr_name + "_000.mbr"
+                channel_number) + "_" + self.psr_name_date_tine + "_000.mbr"
             print("\nreading file         : ", mbr_filename)
             file = open(mbr_filename, "rb")
             file.read(22)
@@ -137,42 +172,88 @@ class PulsarInformationUtility:
             print("ch:0" + str(channel_number) + "	LO: " + str(lo_freq) + "	CF: "
                   + str(central_freq))
 
-            populate_resources(central_freq, channel_number, output_filename, populate_config,
-                               populate_resources_file)
+            populate_resources(central_freq, channel_number, output_filename, populate_config_flag,
+                               populate_resources_file_flag)
             output_array.append([channel_number, central_freq])
 
-        if populate_config:
+        if populate_config_flag:
             config_write(config_filename)
 
         return dict(output_array)
 
     def populate_all_channels_sampling_frequency_and_first_packet_in_config(self):
-        synchronization_all.main(self.psr_name)
+        print(f"{bcolors.HEADER}Populating sampling frequency and first packet...\n{bcolors.ENDC}")
+        synchronization_all.main(self.psr_name_date_tine)
 
     def populate_all_channels_sync_dispersion_delay_packet(self):
-        populate_config(self.config_filename)
+        print(f"{bcolors.HEADER}Populating dispersion delay packet sync...\n{bcolors.ENDC}")
+        read_config(self.config_filename)
         ref_band = 9
-        n_channels = self.n_channels
+        n_bands = self.n_bands
         dm = self.dm
-        time_delay = np.zeros(n_channels)
-
-        # for i in range(9):
-        #     time_delay[0, i] = calculate_time_delay(dm, i + 1, ref_band)  # other dm is 5.7
+        time_delay = np.zeros(n_bands)
 
         print("Skip packets for dispersion delay compensation:")
-        for i in range(n_channels):
+        for i in range(n_bands):
             time_delay[i] = time_delay_2_col_delay(calculate_time_delay(dm, i + 1, ref_band))
             print("ch:" + str(i + 1) + "	" + str(time_delay[i]))
 
-        for i in range(1, n_channels + 1):
+        for i in range(1, n_bands + 1):
             config_set_sync_dispersion_delay_packet_frequency(i, int(time_delay[i - 1]))
         config_write(self.config_filename)
 
+    def run(self):
+        config_filename = self.config_filename
+        print(f"{bcolors.HEADER}\nconfig file path: {config_filename}")
+        print(f"current config file contents: \n{bcolors.ENDC}")
 
-psr = PulsarInformationUtility("B0834+06_20090725_114903")
-cf = psr.populate_all_channels_central_frequency_in_config(False, False)
-print(cf)
-print(cf.get(3))
+        with open(config_filename, "r") as config_file:
+            print(config_file.read())
 
-psr.populate_all_channels_sampling_frequency_and_first_packet_in_config()
-psr.populate_all_channels_sync_dispersion_delay_packet()
+        while True:
+            valid_option = True
+            print_run_options()
+            option = input()
+            if option.lower() == 'q' or (option.isnumeric() and int(option) == 5):
+                print("\n*** Bye! ***\n")
+                break
+            if option.isnumeric():
+                if int(option) == 1:
+                    self.populate_all_channels_central_frequency_in_config()
+                elif int(option) == 2:
+                    self.populate_all_channels_sampling_frequency_and_first_packet_in_config()
+                elif int(option) == 3:
+                    self.populate_all_channels_sync_dispersion_delay_packet()
+                elif int(option) == 4:
+                    self.populate_all_channels_central_frequency_in_config()
+                    self.populate_all_channels_sampling_frequency_and_first_packet_in_config()
+                    self.populate_all_channels_sync_dispersion_delay_packet()
+                else:
+                    valid_option = False
+            else:
+                valid_option = False
+
+            if not valid_option:
+                print(f"Invalid input: \"{option}\"\nEnter valid input(1,2,3,4,5,Q,q)\n8")
+
+            if valid_option:
+                print(f"Option {option} execution complete. Printing new config\n")
+                with open(config_filename, "r") as config_file:
+                    print(config_file.read())
+
+
+def main(file_name):
+    psr = PulsarInformationUtility(file_name)  # "B0834+06_20090725_114903"
+    print(psr.dm)
+    psr.run()
+
+if __name__ == '__main__':
+    main(sys.argv[1])
+
+# psr = PulsarInformationUtility("B0834+06_20090725_114903")
+# cf = psr.populate_all_channels_central_frequency_in_config(False, False)
+# print(cf)
+# print(cf.get(3))
+#
+# psr.populate_all_channels_sampling_frequency_and_first_packet_in_config()
+# psr.populate_all_channels_sync_dispersion_delay_packet()

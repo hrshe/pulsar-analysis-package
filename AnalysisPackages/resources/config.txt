@@ -1,7 +1,7 @@
 [pulsar-config]
-p = 1273
+period = 1273
 dm = 12.45
-n_channels = 9
+n_bands = 9
 
 [general-config]
 n_packet_integration = 60
