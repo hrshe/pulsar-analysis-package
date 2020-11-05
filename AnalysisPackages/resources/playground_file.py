@@ -2,6 +2,10 @@ import numpy as np
 import configparser
 from pathlib import Path
 
+"""
+Purpose of this file is to execute rough patches of code... Not to be included in final project
+"""
+
 from AnalysisPackages.utilities.bcolors import bcolors
 from AnalysisPackages.utilities.pulsar_information_utility import PulsarInformationUtility, BandSpecificConfig
 
