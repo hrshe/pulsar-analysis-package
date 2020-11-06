@@ -20,10 +20,12 @@ from AnalysisPackages.synchronization import synchronization_all
 config = configparser.ConfigParser()
 
 
-def get_intermediate_frequency(channel_number):
-    if channel_number in (1, 2):
+def get_intermediate_frequency(band_number):
+    if band_number in (1, 2):
         return 70
-    return 140
+    if band_number in range(3, 10):
+        return 140
+    raise ValueError(f"invalid band number {band_number}")
 
 
 def config_write(filename):
@@ -37,6 +39,7 @@ def config_set_central_frequency(channel_number, central_freq):
     except configparser.NoSectionError:
         print('[channel-' + str(channel_number) + '-specific] section not found. Creating new section')
         config['channel-' + str(channel_number) + '-specific'] = {'central_frequency': str(central_freq)}
+    return config
 
 
 def populate_resources(central_freq, channel_number, output_filename, populate_config,
@@ -48,8 +51,8 @@ def populate_resources(central_freq, channel_number, output_filename, populate_c
         config_set_central_frequency(channel_number, central_freq)
 
 
-def populate_resources_setup(psr_name, config_filename, output_filename, populate_config, populate_resources_file,
-                             root_dirname):
+def populate_resources_setup(psr_name, config_filename, output_filename, populate_config,
+                             populate_resources_file, root_dirname):
     if populate_config:
         config.read(config_filename)
         print("populate_config set to True. " + config_filename + " will be updated")
@@ -69,10 +72,11 @@ def populate_resources_setup(psr_name, config_filename, output_filename, populat
 def read_config(filename):
     config.read(filename)
     print("\n\n" + filename + " config file read into configparser")
+    return config
 
 
-def time_delay_2_col_delay(t):
-    return t * (32150 / 512)
+def time_delay_2_packet_delay(t, sampling_frequency):
+    return t * (sampling_frequency*1000 / 512)
 
 
 def calculate_time_delay(dm, band, reference_band):
@@ -96,7 +100,7 @@ def config_set_sync_dispersion_delay_packet_frequency(channel_number, sync_dispe
         print('[channel-' + str(channel_number) + '-specific] section not found. Creating new section')
         config['channel-' + str(channel_number) + '-specific'] = {
             'sync_dispersion_delay_packet': str(sync_dispersion_delay_packet)}
-
+    return config
 
 def print_run_options():
     print(f"{bcolors.HEADER}Verify contents and select options to populate missing contents")
@@ -226,7 +230,8 @@ class PulsarInformationUtility:
 
         print("Skip packets for dispersion delay compensation:")
         for i in range(n_bands):
-            time_delay[i] = time_delay_2_col_delay(calculate_time_delay(dm, i + 1, ref_band))
+            time_delay[i] = time_delay_2_packet_delay(calculate_time_delay(dm, i + 1, ref_band),
+                                                      self.band[i].sampling_frequency)
             print("ch:" + str(i + 1) + "	" + str(time_delay[i]))
 
         for i in range(1, n_bands + 1):

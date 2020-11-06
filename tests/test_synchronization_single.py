@@ -1,5 +1,6 @@
 import unittest
-from synchronization import synchronization_single
+
+from AnalysisPackages.synchronization import synchronization_single
 
 
 class TestSynchronization(unittest.TestCase):
@@ -12,3 +13,7 @@ class TestSynchronization(unittest.TestCase):
     def test_double_arr_to_list(self):
         self.assertEqual([1, 2, 3, 4], synchronization_single.double_arr_to_list([[1, 2], [3, 4]]))
         self.assertEqual([1, 2, 3, 4], synchronization_single.double_arr_to_list([[1], [2, 3, 4]]))
+
+
+if __name__ == "__main__":
+    unittest.main()
