@@ -137,6 +137,7 @@ class BandSpecificConfig(object):
             print(f"{bcolors.WARNING}'sync_dispersion_delay_packet' key not found for band {band} while creating "
                   f"BandSpecific instance... {bcolors.ENDC}")
 
+
 class PulsarInformationUtility:
     def __init__(self, mbr_pulsar_name_date_time):
         self.root_dirname = str(Path(__file__).parent.parent.parent.absolute())
@@ -280,11 +281,3 @@ def main(file_name):
 
 if __name__ == '__main__':
     main(sys.argv[1])
-
-# psr = PulsarInformationUtility("B0834+06_20090725_114903")
-# cf = psr.populate_all_channels_central_frequency_in_config(False, False)
-# print(cf)
-# print(cf.get(3))
-#
-# psr.populate_all_channels_sampling_frequency_and_first_packet_in_config()
-# psr.populate_all_channels_sync_dispersion_delay_packet()
