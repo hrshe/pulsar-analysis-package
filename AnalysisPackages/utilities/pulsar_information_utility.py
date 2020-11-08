@@ -9,11 +9,11 @@ Also holds the information from config.txt as instance variables to be used in a
 Usage:
 python3 -m AnalysisPackages.utilities.pulsar_information_utility B0834+06_20090725_114903
 """
+from pathlib import Path
 import os
 import sys
 import configparser
 import numpy as np
-from pathlib import Path
 from AnalysisPackages.utilities.bcolors import bcolors
 from AnalysisPackages.synchronization import synchronization_all
 
@@ -75,8 +75,8 @@ def read_config(filename):
     return config
 
 
-def time_delay_2_packet_delay(t, sampling_frequency):
-    return t * (sampling_frequency*1000 / 512)
+def time_delay_2_packet_delay(time, sampling_frequency):
+    return time * (sampling_frequency * 1000 / 512)
 
 
 def calculate_time_delay(dm, band, reference_band):
@@ -85,11 +85,13 @@ def calculate_time_delay(dm, band, reference_band):
 
 def get_band_upper_freq(band):  # in MHz
     try:
-        bw = float(config.get('channel-' + str(band) + '-specific', 'sampling_frequency')) / 2
-        cf = float(config.get('channel-' + str(band) + '-specific', 'central_frequency'))
+        band_width = float(config.get('channel-' + str(band) + '-specific', 'sampling_frequency')) / 2
+        central_frequency = float(config.get('channel-' + str(band) + '-specific', 'central_frequency'))
     except configparser.NoSectionError:
         print('section ' + '[channel-' + str(band) + '-specific] does not exist... skipping')
-    return cf + (bw / 2)
+        raise ValueError(f"{bcolors.FAIL}Error while setting band upper frequency for band {band}."
+                         f"\nDispersion delay across bands not calculated{bcolors.ENDC}")
+    return central_frequency + (band_width / 2)
 
 
 def config_set_sync_dispersion_delay_packet_frequency(channel_number, sync_dispersion_delay_packet):
@@ -102,11 +104,12 @@ def config_set_sync_dispersion_delay_packet_frequency(channel_number, sync_dispe
             'sync_dispersion_delay_packet': str(sync_dispersion_delay_packet)}
     return config
 
+
 def print_run_options():
     print(f"{bcolors.HEADER}Verify contents and select options to populate missing contents")
-    print(f"1. Populate central frequency for all bands in config.txt")
-    print(f"2. Populate sampling frequency and first packet for all bands in config.txt")
-    print(f"3. Populate packets to skip for dispersion delay synchronization across bands in config.txt")
+    print("1. Populate central frequency for all bands in config.txt")
+    print("2. Populate sampling frequency and first packet for all bands in config.txt")
+    print("3. Populate packets to skip for dispersion delay synchronization across bands in config.txt")
     print(f"4. Do all{bcolors.ENDC}")
     print(f"{bcolors.OKGREEN}5. Exit(enter Q or 5){bcolors.ENDC}")
     print(
@@ -115,7 +118,7 @@ def print_run_options():
     print("Enter your option: ")
 
 
-class BandSpecificConfig(object):
+class BandSpecificConfig:
     def __init__(self, config_dictionary, band):
         try:
             self.central_frequency = float(config_dictionary['central_frequency'])
@@ -169,22 +172,20 @@ class PulsarInformationUtility:
             print(f"{bcolors.WARNING}\nChannel specific section missing... Check config.txt or use run() method "
                   f"of this class to repopulate config.txt{bcolors.ENDC}")
 
-    """
-    returns a dictionary of channel_number and central_frequency as key(int):value(float) pairs
-    
-    eg: {1: 120, 2: 172, 3: 233, 4: 330}
-    cf.get(3) gives 233.0.
-    """
-
     def populate_all_channels_central_frequency_in_config(self, populate_config_flag=True,
                                                           populate_resources_file_flag=False):
+        """
+        returns a dictionary of channel_number and central_frequency as key(int):value(float) pairs
+        eg: {1: 120, 2: 172, 3: 233, 4: 330}
+        cf.get(3) gives 233.0.
+        """
         print(f"{bcolors.HEADER}Populating central frequency...\n{bcolors.ENDC}")
         root_dirname = self.root_dirname
         config_filename = self.config_filename
         output_filename = (root_dirname + "/AnalysisPackages/resources/ChannelVsDispersionPacketDelay_"
-                           + self.psr_name_date_tine + ".txt")
+                           + self.psr_name_date_time + ".txt")
 
-        populate_resources_setup(self.psr_name_date_tine, config_filename, output_filename, populate_config_flag,
+        populate_resources_setup(self.psr_name_date_time, config_filename, output_filename, populate_config_flag,
                                  populate_resources_file_flag, root_dirname)
 
         output_array = []
@@ -198,7 +199,7 @@ class PulsarInformationUtility:
                 continue
 
             mbr_filename = input_dirname + "/ch0" + str(channel_number) + "/ch0" + str(
-                channel_number) + "_" + self.psr_name_date_tine + "_000.mbr"
+                channel_number) + "_" + self.psr_name_date_time + "_000.mbr"
             print("\nreading file         : ", mbr_filename)
             file = open(mbr_filename, "rb")
             file.read(22)
@@ -218,7 +219,7 @@ class PulsarInformationUtility:
 
     def populate_all_channels_sampling_frequency_and_first_packet_in_config(self):
         print(f"{bcolors.HEADER}Populating sampling frequency and first packet...\n{bcolors.ENDC}")
-        synchronization_all.main(self.psr_name_date_tine)
+        synchronization_all.main(self.psr_name_date_time)
 
     def populate_all_channels_sync_dispersion_delay_packet(self):
         print(f"{bcolors.HEADER}Populating dispersion delay packet sync...\n{bcolors.ENDC}")

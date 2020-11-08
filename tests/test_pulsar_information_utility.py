@@ -8,9 +8,6 @@ config_filename = root_dirname + '/AnalysisPackages/resources/config.txt'
 
 
 class TestPulsarInformationUtility(unittest.TestCase):
-    # def setUp(self):
-    #     pulsar_information_utility.config = False
-
     def test_get_intermediate_frequency(self):
         self.assertEqual(70, pulsar_information_utility.get_intermediate_frequency(1))
         self.assertEqual(70, pulsar_information_utility.get_intermediate_frequency(2))
