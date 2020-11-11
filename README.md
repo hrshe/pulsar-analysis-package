@@ -88,7 +88,7 @@ Let us call this line ‘A’. Refer Fig 1.2
   <img src="readmeImages/synchronization.png"/>
 </p>
 <p align="center">
-  <a>Table 1.2: GPS counts vs Packet Number</a>
+  <a>Figure 1.2: GPS counts vs Packet Number</a>
   <br><br>
   <a>The packet with ‘high’ GPS pulse in header is marked in red</a>
   <br><br>
