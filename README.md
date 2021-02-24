@@ -25,7 +25,6 @@ The idea here is to use OOPs to build a simple data processing tool for pulsar d
 2. [Pulsar Information Utility](#2-pulsar-information-utility)
 3. [Dynamic Spectrum to Time Series](#3-dynamic-spectrum-to-time-series)
 
-
 ## 1. MBR to Dynamic Spectrum
 The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the 
 MBR along with a header are saved in '.mbr' files.
