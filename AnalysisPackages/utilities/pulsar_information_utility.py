@@ -232,7 +232,7 @@ class PulsarInformationUtility:
         print("Skip packets for dispersion delay compensation:")
         for i in range(n_bands):
             time_delay[i] = time_delay_2_packet_delay(calculate_time_delay(dm, i + 1, ref_band),
-                                                      self.band[i].sampling_frequency)
+                                                      self.band[i+1].sampling_frequency)
             print("ch:" + str(i + 1) + "	" + str(time_delay[i]))
 
         for i in range(1, n_bands + 1):
