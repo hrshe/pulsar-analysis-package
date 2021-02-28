@@ -160,9 +160,11 @@ class PulsarInformationUtility:
         self.n_packet_integration = int(config.get('general-config', 'n_packet_integration'))
         self.last_sequence_number = int(config.get('general-config', 'last_sequence_number'))
         self.n_channels = int(config.get('general-config', 'n_channels'))
+        self.n_parts = int(config.get('general-config', 'n_parts'))
 
         self.band = None
         self.set_band_specific_from_config()
+        print("PulsarUtilityInformation initiated for pulsar: ", self.psr_name_date_time)
 
     def set_band_specific_from_config(self):
         read_config(self.config_filename)
