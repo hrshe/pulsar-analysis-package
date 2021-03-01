@@ -71,8 +71,9 @@ def main(file_name, pulsar_information_utility_flag=False):
 
             for pkt in packet_list:
                 current_pkt_number = pkt.packetNumber
-                if current_pkt_number < skip_to_n_packets:
-                    continue
+                if synchronization_flag:
+                    if current_pkt_number < skip_to_n_packets:
+                        continue
 
                 if print_count % 25000 == 1:  # todo add status bar
                     print("Ch:" + str(channel_number) + "	Seq Number:" + str(seq_number) + "		" +
@@ -84,7 +85,7 @@ def main(file_name, pulsar_information_utility_flag=False):
                 if not first_packet_flag:
                     if global_packet_count != current_pkt_number:
                         # if missing packet, increase global count and col count, ie dynamic_sequence_packet_count
-                        dynamic_sequence_packet_count = current_pkt_number - packet_list[0].packetNumber
+                        dynamic_sequence_packet_count = current_pkt_number - zeroth_packet_number
                         global_packet_count = current_pkt_number
 
                         # add read packet data to dynamic seq array
@@ -92,7 +93,7 @@ def main(file_name, pulsar_information_utility_flag=False):
                             dynamic_sequence_packet_count, global_packet_count, pkt, x_polarization_dynamic_seq,
                             y_polarization_dynamic_seq)
 
-                        # todo handle edge condition where missing packets between two mbr files
+                        # todo handle edge condition where missing packets between two mbr files and between two mbr file parts
 
                     else:
                         dynamic_sequence_packet_count, global_packet_count = write_packet_data_to_dynamic_sequence(
@@ -100,6 +101,7 @@ def main(file_name, pulsar_information_utility_flag=False):
                             y_polarization_dynamic_seq)
 
                 elif first_packet_flag:
+                    # todo re look at this after new synch logic
                     first_packet_number = current_pkt_number
                     global_packet_count = current_pkt_number
                     first_packet_flag = False
@@ -151,13 +153,6 @@ def write_packet_data_to_dynamic_sequence(dynamic_sequence_packet_count, global_
     dynamic_sequence_packet_count = dynamic_sequence_packet_count + 1
     return dynamic_sequence_packet_count, global_packet_count
 
-
-def get_empty_dynamic_sequence(n_channels, packet_list):
-    empty_dynamic_sequence = np.empty((packet_list[-1].packetNumber - packet_list[0].packetNumber + 1, n_channels * 2))
-    empty_dynamic_sequence.fill(np.nan)
-    x_polarization_dynamic_seq = np.array(empty_dynamic_sequence, copy=True)
-    y_polarization_dynamic_seq = np.array(empty_dynamic_sequence, copy=True)
-    return x_polarization_dynamic_seq, y_polarization_dynamic_seq
 
 
 def read_mbr_file(current_mbr_filename):
