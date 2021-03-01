@@ -17,36 +17,28 @@ def main(file_name, pulsar_information_utility_flag=False):
         # todo -> print config and ask to run()
         psr.run()
 
-    channel_number = int(file_name[2:4])
-    central_freq = psr.band[channel_number].central_frequency
-    n_parts = psr.n_parts
-    n_channels = psr.n_channels
-    n_int = psr.n_packet_integration
-    skip_to_n_packets = int(psr.band[channel_number].sync_first_packet) + \
-                        int(psr.band[channel_number].sync_dispersion_delay_packet)
-    last_seq_number = psr.last_sequence_number
-
+    # declare variables and constants
     seq_number = 0
     global_packet_count = 0
-    first_packet_number = 0  # first packet of entire mbr
     first_packet_flag = True
     synchronization_flag = False
-
+    channel_number = int(file_name[2:4])
     root_dirname = str(Path(__file__).parent.parent.parent.absolute()) + '/'
     current_mbr_filename = get_mbr_filename(root_dirname, file_name, channel_number, seq_number)
     mbr_filesize = getsize(current_mbr_filename)
     packets_in_mbr_file = int(mbr_filesize / packet.packetSize)
-
-    missing_packets_array = np.empty(n_channels * 2)
+    missing_packets_array = np.empty(psr.n_channels * 2)
     missing_packets_array.fill(np.nan)
+    skip_to_n_packets = int(psr.band[channel_number].sync_first_packet) + \
+                        int(psr.band[channel_number].sync_dispersion_delay_packet)
 
     while True:
         mbr_file = read_mbr_file(current_mbr_filename)
 
-        for part_i in range(n_parts):
+        for part_i in range(psr.n_parts):
             print_count = 0  # todo just for printing status of completion(can add a status bar)
 
-            packet_list = packet.mbr2packetList(mbr_file.read(int(mbr_filesize / n_parts)))
+            packet_list = packet.mbr2packetList(mbr_file.read(int(mbr_filesize / psr.n_parts)))
             print("packets read")
 
             zeroth_packet_number = packet_list[0].packetNumber
@@ -62,8 +54,7 @@ def main(file_name, pulsar_information_utility_flag=False):
                     else:
                         zeroth_packet_number = packet_list[0].packetNumber
 
-            empty_dynamic_sequence = np.empty(
-                (packet_list[-1].packetNumber - zeroth_packet_number + 1, n_channels * 2))
+            empty_dynamic_sequence = np.empty((packet_list[-1].packetNumber - zeroth_packet_number + 1, psr.n_channels * 2))
             empty_dynamic_sequence.fill(np.nan)
             x_polarization_dynamic_seq = np.array(empty_dynamic_sequence, copy=True)
             y_polarization_dynamic_seq = np.array(empty_dynamic_sequence, copy=True)
@@ -78,7 +69,7 @@ def main(file_name, pulsar_information_utility_flag=False):
 
                 if print_count % 25000 == 1:  # todo add status bar
                     print("Ch:" + str(channel_number) + "	Seq Number:" + str(seq_number) + "		" +
-                          "{:.2f}".format(((packets_in_mbr_file / n_parts) * part_i + dynamic_sequence_packet_count)
+                          "{:.2f}".format(((packets_in_mbr_file / psr.n_parts) * part_i + dynamic_sequence_packet_count)
                                           * 100 / packets_in_mbr_file)
                           + "% complete")
                 print_count = print_count + 1
@@ -94,7 +85,7 @@ def main(file_name, pulsar_information_utility_flag=False):
                             dynamic_sequence_packet_count, global_packet_count, pkt, x_polarization_dynamic_seq,
                             y_polarization_dynamic_seq)
 
-                        # todo handle edge condition where missing packets between two mbr files and between two mbr file parts
+                        # todo handle edge condition where missing packets between two mbr files
 
                     else:
                         dynamic_sequence_packet_count, global_packet_count = write_packet_data_to_dynamic_sequence(
@@ -102,7 +93,6 @@ def main(file_name, pulsar_information_utility_flag=False):
                             y_polarization_dynamic_seq)
 
                 elif first_packet_flag:
-                    # todo re look at this after new synch logic
                     first_packet_number = current_pkt_number
                     global_packet_count = current_pkt_number
                     first_packet_flag = False
@@ -118,31 +108,36 @@ def main(file_name, pulsar_information_utility_flag=False):
 
             # remove first and last 5 columns
             clean_dynamic_spectrum_all(dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y)
-            print(f"fft for part {str(part_i)} done")
 
             # integrate this dynamic spectrum
-            dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y = \
-                integrate_dynamic_spectrum_all(
-                    dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y, missing_packets_array, n_channels,
-                    n_int)
+            dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y = integrate_dynamic_spectrum_all(
+                    dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y,
+                    missing_packets_array, psr.n_channels, psr.n_packet_integration)
 
             # uncomment to plot dynamic spectrum
             # plot_DS(integrated_dynamic_spectrum)
 
-            save_spec_file(channel_number, dynamic_spectrum_x, file_name, root_dirname, seq_number, "XX")
-            save_spec_file(channel_number, dynamic_spectrum_y, file_name, root_dirname, seq_number, "YY")
-            save_spec_file(channel_number, np.real(dynamic_spectrum_cross), file_name, root_dirname, seq_number, "realXY")
-            save_spec_file(channel_number, np.imag(dynamic_spectrum_cross), file_name, root_dirname, seq_number, "imagXY")
+            save_spec_file_all(channel_number, dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y,
+                               file_name, root_dirname, seq_number)
 
         seq_number = seq_number + 1
         if not isfile(get_mbr_filename(root_dirname, file_name, channel_number, seq_number)) \
-                or seq_number > last_seq_number:
+                or seq_number > psr.last_sequence_number:
             break
+
+
+def save_spec_file_all(channel_number, dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y, file_name,
+                       root_dirname, seq_number):
+    save_spec_file(channel_number, dynamic_spectrum_x, file_name, root_dirname, seq_number, "XX")
+    save_spec_file(channel_number, dynamic_spectrum_y, file_name, root_dirname, seq_number, "YY")
+    save_spec_file(channel_number, np.real(dynamic_spectrum_cross), file_name, root_dirname, seq_number, "realXY")
+    save_spec_file(channel_number, np.imag(dynamic_spectrum_cross), file_name, root_dirname, seq_number, "imagXY")
 
 
 def save_spec_file(channel_number, dynamic_spectrum, file_name, root_dirname, seq_number, polarization):
     filename = open(get_output_filename(channel_number, file_name, root_dirname, seq_number, polarization), "ab")
     np.savetxt(filename, dynamic_spectrum, fmt='%1.3f')
+    print(f"saved SPEC file: {file_name}")
     filename.close()
 
 
@@ -152,19 +147,15 @@ def get_output_filename(channel_number, file_name, root_dirname, seq_number, pol
 
 def integrate_dynamic_spectrum_all(dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y,
                                    missing_packets_array, n_channels, n_int):
-    dynamic_spectrum_x = integrate_dynamic_spectrum(dynamic_spectrum_x, missing_packets_array, n_channels,
-                                                    n_int)
-    dynamic_spectrum_y = integrate_dynamic_spectrum(dynamic_spectrum_y, missing_packets_array, n_channels,
-                                                    n_int)
-    dynamic_spectrum_cross = integrate_dynamic_spectrum(dynamic_spectrum_cross, missing_packets_array, n_channels,
-                                                        n_int)
+    dynamic_spectrum_x = integrate_dynamic_spectrum(dynamic_spectrum_x, missing_packets_array, n_channels, n_int)
+    dynamic_spectrum_y = integrate_dynamic_spectrum(dynamic_spectrum_y, missing_packets_array, n_channels, n_int)
+    dynamic_spectrum_cross = integrate_dynamic_spectrum(dynamic_spectrum_cross, missing_packets_array, n_channels, n_int)
     return dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y
 
 
 def integrate_dynamic_spectrum(dynamic_spectrum_x, missing_packets_array, n_channels, n_int):
     remainder = len(dynamic_spectrum_x) % n_int
-    dynamic_spectrum_x = np.vstack(
-        [dynamic_spectrum_x, [missing_packets_array[:n_channels]] * (n_int - remainder)])
+    dynamic_spectrum_x = np.vstack([dynamic_spectrum_x, [missing_packets_array[:n_channels]] * (n_int - remainder)])
     dynamic_spectrum_x = dynamic_spectrum_x.reshape(n_int, -1, n_channels, order="F")
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)
@@ -193,8 +184,8 @@ def compute_dynamic_spectrum_all(x_polarization_dynamic_seq, y_polarization_dyna
 
 
 def clean_dynamic_spectrum(dynamic_spectrum):
-    dynamic_spectrum[:, 0:5] = 0
-    dynamic_spectrum[:, 250:256] = 0
+    dynamic_spectrum[:, 0] = 0
+    dynamic_spectrum[:, 255] = 0
 
 
 def compute_dynamic_spectrum(polarization_dynamic_seq):
