@@ -1,9 +1,11 @@
 import sys
+import warnings
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 from mbr import packet
-from os.path import getsize
+from os.path import getsize, isfile
 from pathlib import Path
 from utilities.pulsar_information_utility import PulsarInformationUtility
 
@@ -110,7 +112,7 @@ def main(file_name, pulsar_information_utility_flag=False):
                         dynamic_sequence_packet_count, global_packet_count, pkt, x_polarization_dynamic_seq,
                         y_polarization_dynamic_seq)
 
-            # do fft for dyn seq to get dyn spectra
+            # do fft for dyn seq to get dynamic spectra
             dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y = compute_dynamic_spectrum_all(
                 x_polarization_dynamic_seq, y_polarization_dynamic_seq)
 
@@ -127,9 +129,25 @@ def main(file_name, pulsar_information_utility_flag=False):
             # uncomment to plot dynamic spectrum
             # plot_DS(integrated_dynamic_spectrum)
 
-            print(dynamic_spectrum_x.shape)
-            print(dynamic_spectrum_y.shape)
-            print(dynamic_spectrum_cross.shape)
+            save_spec_file(channel_number, dynamic_spectrum_x, file_name, root_dirname, seq_number, "XX")
+            save_spec_file(channel_number, dynamic_spectrum_y, file_name, root_dirname, seq_number, "YY")
+            save_spec_file(channel_number, np.real(dynamic_spectrum_cross), file_name, root_dirname, seq_number, "realXY")
+            save_spec_file(channel_number, np.imag(dynamic_spectrum_cross), file_name, root_dirname, seq_number, "imagXY")
+
+        seq_number = seq_number + 1
+        if not isfile(get_mbr_filename(root_dirname, file_name, channel_number, seq_number)) \
+                or seq_number > last_seq_number:
+            break
+
+
+def save_spec_file(channel_number, dynamic_spectrum, file_name, root_dirname, seq_number, polarization):
+    filename = open(get_output_filename(channel_number, file_name, root_dirname, seq_number, polarization), "ab")
+    np.savetxt(filename, dynamic_spectrum, fmt='%1.3f')
+    filename.close()
+
+
+def get_output_filename(channel_number, file_name, root_dirname, seq_number, polarization):
+    return root_dirname + f"OutputData/DynamicSpectrum/ch0{str(channel_number)}/" + file_name + '_'+polarization+'_' + "{0:0=3d}".format(seq_number) + ".spec"
 
 
 def integrate_dynamic_spectrum_all(dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y,
@@ -148,7 +166,9 @@ def integrate_dynamic_spectrum(dynamic_spectrum_x, missing_packets_array, n_chan
     dynamic_spectrum_x = np.vstack(
         [dynamic_spectrum_x, [missing_packets_array[:n_channels]] * (n_int - remainder)])
     dynamic_spectrum_x = dynamic_spectrum_x.reshape(n_int, -1, n_channels, order="F")
-    dynamic_spectrum_x = np.nanmean(dynamic_spectrum_x, axis=0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        dynamic_spectrum_x = np.nanmean(dynamic_spectrum_x, axis=0)
     return dynamic_spectrum_x
 
 
@@ -168,7 +188,8 @@ def compute_dynamic_spectrum_all(x_polarization_dynamic_seq, y_polarization_dyna
     dynamic_spectrum_x = compute_dynamic_spectrum(x_polarization_dynamic_seq)
     dynamic_spectrum_y = compute_dynamic_spectrum(y_polarization_dynamic_seq)
     dynamic_spectrum_cross = dynamic_spectrum_x * np.conj(dynamic_spectrum_y)
-    return dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y
+
+    return dynamic_spectrum_cross, abs(np.square(dynamic_spectrum_x)), abs(np.square(dynamic_spectrum_y))
 
 
 def clean_dynamic_spectrum(dynamic_spectrum):
@@ -178,7 +199,6 @@ def clean_dynamic_spectrum(dynamic_spectrum):
 
 def compute_dynamic_spectrum(polarization_dynamic_seq):
     dynamic_spectrum = np.fft.fft2(polarization_dynamic_seq, axes=[1])[:, :256] / 512
-    dynamic_spectrum = abs(np.square(dynamic_spectrum))
     return dynamic_spectrum
 
 

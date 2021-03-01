@@ -21,3 +21,8 @@ print(reshaped)
 
 print("\n\nintegrated dyn spec: \n")
 print(np.nanmean(reshaped, axis=0))
+
+
+f_x 	=	open("sample.txt", "ab")
+np.savetxt(f_x, dyn_spectrum, fmt='%1.3f')
+f_x.close()
