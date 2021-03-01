@@ -1,5 +1,4 @@
 import sys
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -50,7 +49,7 @@ def main(file_name, pulsar_information_utility_flag=False):
 
             zeroth_packet_number = packet_list[0].packetNumber
 
-            if(synchronization_flag):
+            if synchronization_flag:
                 # skip whole part if skip_n_packets > last_packet_number
                 # todo check this logic
                 if skip_to_n_packets > packet_list[-1].packetNumber:
@@ -117,8 +116,46 @@ def main(file_name, pulsar_information_utility_flag=False):
 
             # remove first and last 5 columns
             clean_dynamic_spectrum_all(dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y)
-
             print(f"fft for part {str(part_i)} done")
+
+            # integrate this dynamic spectrum
+            dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y = \
+                integrate_dynamic_spectrum_all(
+                    dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y, missing_packets_array, n_channels,
+                    n_int)
+
+            # uncomment to plot dynamic spectrum
+            # plot_DS(integrated_dynamic_spectrum)
+
+            print(dynamic_spectrum_x.shape)
+            print(dynamic_spectrum_y.shape)
+            print(dynamic_spectrum_cross.shape)
+
+
+def integrate_dynamic_spectrum_all(dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y,
+                                   missing_packets_array, n_channels, n_int):
+    dynamic_spectrum_x = integrate_dynamic_spectrum(dynamic_spectrum_x, missing_packets_array, n_channels,
+                                                    n_int)
+    dynamic_spectrum_y = integrate_dynamic_spectrum(dynamic_spectrum_y, missing_packets_array, n_channels,
+                                                    n_int)
+    dynamic_spectrum_cross = integrate_dynamic_spectrum(dynamic_spectrum_cross, missing_packets_array, n_channels,
+                                                        n_int)
+    return dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y
+
+
+def integrate_dynamic_spectrum(dynamic_spectrum_x, missing_packets_array, n_channels, n_int):
+    remainder = len(dynamic_spectrum_x) % n_int
+    dynamic_spectrum_x = np.vstack(
+        [dynamic_spectrum_x, [missing_packets_array[:n_channels]] * (n_int - remainder)])
+    dynamic_spectrum_x = dynamic_spectrum_x.reshape(n_int, -1, n_channels, order="F")
+    dynamic_spectrum_x = np.nanmean(dynamic_spectrum_x, axis=0)
+    return dynamic_spectrum_x
+
+
+def plot_DS(integrated_dynamic_spectrum):
+    plt.imshow(np.transpose(integrated_dynamic_spectrum), interpolation="nearest", aspect='auto')
+    plt.colorbar()
+    plt.show()
 
 
 def clean_dynamic_spectrum_all(dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y):
@@ -134,15 +171,15 @@ def compute_dynamic_spectrum_all(x_polarization_dynamic_seq, y_polarization_dyna
     return dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y
 
 
-def clean_dynamic_spectrum(dynamic_spectrum_x):
-    dynamic_spectrum_x[:, 0:5] = 0
-    dynamic_spectrum_x[:, 250:256] = 0
+def clean_dynamic_spectrum(dynamic_spectrum):
+    dynamic_spectrum[:, 0:5] = 0
+    dynamic_spectrum[:, 250:256] = 0
 
 
-def compute_dynamic_spectrum(x_polarization_dynamic_seq):
-    dynamic_spectrum_x = np.fft.fft2(x_polarization_dynamic_seq, axes=[1])[:, :256] / 512
-    dynamic_spectrum_x = abs(np.square(dynamic_spectrum_x))
-    return dynamic_spectrum_x
+def compute_dynamic_spectrum(polarization_dynamic_seq):
+    dynamic_spectrum = np.fft.fft2(polarization_dynamic_seq, axes=[1])[:, :256] / 512
+    dynamic_spectrum = abs(np.square(dynamic_spectrum))
+    return dynamic_spectrum
 
 
 def write_packet_data_to_dynamic_sequence(dynamic_sequence_packet_count, global_packet_count, pkt,
@@ -152,7 +189,6 @@ def write_packet_data_to_dynamic_sequence(dynamic_sequence_packet_count, global_
     global_packet_count = global_packet_count + 1
     dynamic_sequence_packet_count = dynamic_sequence_packet_count + 1
     return dynamic_sequence_packet_count, global_packet_count
-
 
 
 def read_mbr_file(current_mbr_filename):
