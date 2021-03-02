@@ -20,13 +20,13 @@ in my Thesis Report ([Drifting_Subpulse_Thesis.pdf](Drifting_Subpulse_Thesis.pdf
 The idea here is to use OOPs to build a simple data processing tool for pulsar data.
 
 ## Table of Contents
-1. [MBR to Dynamic Spectrum](#1-mbr-to-dynamic-spectrum)
-      * [Step 1: Packet Level Synchronization](#step-1-packet-level-synchronization)
-2. [Pulsar Information Utility](#2-pulsar-information-utility)
-3. [Dynamic Spectrum to Time Series](#3-dynamic-spectrum-to-time-series)
+1. [MBR data](#1-mbr-data)
+2. [Packet Level Synchronization](#2-packet-level-synchronization)
+3. [Pulsar Information Utility](#3-pulsar-information-utility)
+4. [MBR to Dynamic Spectrum](#4-mbr-to-dynamic-spectrum)
+5. [Dynamic Spectrum to Time Series](#5-dynamic-spectrum-to-time-series)
 
-
-## 1. MBR to Dynamic Spectrum
+## 1. MBR Data
 The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the 
 MBR along with a header are saved in '.mbr' files.
 These '.mbr' data files are to be placed in [MBRData directory](MBRData) channel wise (as shown below) for processing.
@@ -69,11 +69,11 @@ frequency) values obtained for 8 channels is given in Table 1.1
 </p>
 
 The recorded data also suffer from missing packets. These missing packets can be considered as bad data and are flagged 
-(given a value -9999 in dynamic spectrum) so that they can be avoided while calculating time sequence. 
+(given a value np.nan in the dynamic spectrum) so that they can be avoided while calculating time sequence. 
 The missing packets were detected by keeping a count of number of packets read and comparing that to the packet number 
 present in the header of current packet being read.
 
-#### Step 1: Packet Level Synchronization
+## 2. Packet Level Synchronization
 For analysing signals received across all 10 frequency bands, it is extremely important that we synchronize the data 
 from each band. This would ensure that we compare and study pulse signals from different channels having the same origin
 at the pulsar.
@@ -115,7 +115,7 @@ Channel number and first packet of synchronization for all channels is saved in 
 [ChannelVsFirstPacket_\*PSRDetails\*.txt](AnalysisPackages/resources/ChannelVsFirstPacket_B0834+06_20090725_114903.txt)
 (AnalysisPackages/resources/ChannelVsFirstPacket_B0834+06_20090725_114903.txt)
 
-## 2. Pulsar Information Utility
+## 3. Pulsar Information Utility
 Idea behind this utility is to have a class which can be used to hold all configuration parameters and pulsar properties 
 at a single place. This class also has methods to populate the following band specific observation properties in 
 [config.txt](AnalysisPackages/resources/config.txt):
@@ -140,4 +140,91 @@ There'll be a prompt to choose a option to populate config.txt.
 5. Exit(enter Q or 5)
 ```
 Choose a desired option by entering corresponding option value(1,2,3,4,5,Q or q)
-## 3. Dynamic Spectrum to Time Series 
+## 4. MBR to Dynamic Spectrum 
+A Dynamic spectrum is simply intensity as a function of frequency and time. It can be constructed by calculating the 
+spectrum (intensity as a function of frequency) at different times. To calculate the spectrum, we take Fast Fourier Transform (FFT) 
+of 512 samples each in X polarization and Y polarization. Let X and Y be the resulting spectrum for x and y polarization. 
+Intensity spectrum for x polarization can be calculated as (X.X'), where X' denotes complex conjugate of X. Similarly, 
+intensity spectrum for y polarization can be calculated as (Y.Y'). Note that the intensity spectrum has 256 channels.
+The resulting intensity spectrum (Figure 4.1) forms a column of the dynamic spectrum (Figure 4.2) with each column (i.e., spectrum) 
+taken at successive time intervals. Also note that the entire bandwidth of 16MHz is divided into 256 channels. 
+So, each channel is 6.25 KHz wide. We also calculate cross spectrum as (X.Y'). 
+
+<p align="center">
+  <img src="readmeImages/intensitySpectrum.png"/>
+</p>
+<p align="center">
+  <a>Figure 4.1: Intensity spectrum</a>
+  <br><br>
+</p>
+
+<p align="center">
+  <img src="readmeImages/sampleDynamicSpectrum.png"/>
+</p>
+<p align="center">
+  <a>Figure 4.1: Dynamic Spectrum</a>
+  <br><br>
+</p>
+
+Obtaining dynamic spectrum for a particular sequence of .mbr files is done in [mbr2dynamicspectrum.py](AnalysisPackages/mbr/mbr2dynamicspectrum.py).
+Performs the following tasks:
+1) Reads properties from [config.txt](AnalysisPackages/resources/config.txt)
+2) Divides single mbr file into n parts(specified in [config.txt](AnalysisPackages/resources/config.txt))  for processing
+3) Computes the intensity dynamic spectra for X.conjugate(X), Y.conjugate(Y), real(X.conjugate(Y)) and imaginary(X.conjugate(Y))
+    where X and Y correspond to spectra for X polarization and Y polarization respectively.
+    More clarity can be found in section 3.3 in [Drifting_Subpulse_Thesis.pdf](Drifting_Subpulse_Thesis.pdf)
+4) Saves these 4 dynamic spectra as .spec files in [output directory](OutputData) channel wise. For example, the .spec data for 
+    mbr sequence "ch03_B0834+06_20090725_114903" will be saved in path: OutputData/B0834+06_20090725_114903/DynamicSpectrum/ch03/
+
+Usage:
+Run the following command to view help on all optional command line arguments
+```
+python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum -h
+```
+Output describes how to use the command:
+```
+usage: mbr2dynamicspectrum.py input_file_name [-h] [-s] [-plotXX] [-plotYY] [-plotRealXY] [-plotImagXY] [-psrUtil] [-t]
+
+positional arguments(necessary arguments):
+  Argument:             Functionality:
+  file_name             The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)
+
+optional arguments:
+  Arguments:            Functionality:
+  -h, --help            show this help message and exit
+  -s, --packetSynch     Do packet level synchronization across bands
+  -plotXX, --plotXX     plot dynamic spectrum for X polarization after processing each part of mbr file
+  -plotYY, --plotYY     plot dynamic spectrum for Y polarization after processing each part of mbr file
+  -plotRealXY, --plotRealXY
+                        plot dynamic spectrum for real part of cross (X.Conjugate(Y)) after processing each part of mbr file
+  -plotImagXY, --plotImagXY
+                        plot dynamic spectrum for imaginary part of cross (X.Conjugate(Y)) after processing each part of mbr file
+  -psrUtil, --psrUtil   run pulsar_information_utility for populating the config file before computing the dynamic spectra
+  -t, --timer           print time taken to process each part of mbr file
+
+```
+Not passing the optional argument will simply not execute the corresponding functionality.
+
+In most cases, we will run:
+```
+python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_114903
+```
+
+For obtaining the dynamic spectrum with packet level synchronization across all bands we use teh following command. 
+Apart from the synchronization mentioned in [Section 2](#2-packet-level-synchronization), this also includes 
+synchronization to compensate for dispersion delay across bands:
+```
+python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_114903 -packetSynch
+```
+
+All optional parameters set to true:
+```
+python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_114903 -packetSynch -plotXX -plotYY -plotRealXY -plotImagXY -runPsrUtility -psrUtil
+```
+
+Note:
+
+Setting the optional plotting parameters (-plotXX, -plotYY, -plotRealXY or -plotImagXY) will plot the selected dynamic spectra
+after processing each part of mbr file. After this, the program will ask during runtime whether to continue plotting for subsequent parts(Y) or not(n). 
+The default is 'n'. That is, if a 'Y' is not provided, plotting will be suspended for subsequent parts.
+## 5. Dynamic Spectrum to Time Series 

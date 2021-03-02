@@ -7,6 +7,7 @@ n_bands = 9
 n_packet_integration = 60
 last_sequence_number = 3
 n_channels = 256
+n_parts = 16
 
 [folding-config]
 n_bins = 3000

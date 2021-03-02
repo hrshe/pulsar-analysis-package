@@ -34,8 +34,9 @@ def main(psrDetails):
     output_file.close()
 
     for channelNumber in range(1, 10):
-        if not os.path.exists(str(dirname.parent) + "/MBRData/ch0" + str(channelNumber)):
-            print("PATH NOT FOUND: " + str(dirname.parent) + "/MBRData/ch0" + str(channelNumber))
+        mbr_filename = str(dirname.parent) + "/MBRData/ch0" + str(channelNumber)
+        if not os.path.exists(mbr_filename):
+            print("PATH NOT FOUND: " + mbr_filename)
             print("Continuing to next available channel number")
             continue
 

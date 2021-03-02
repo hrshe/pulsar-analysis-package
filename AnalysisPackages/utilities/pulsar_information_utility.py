@@ -1,5 +1,5 @@
 """
-To perform the following tasks:
+Performs the following tasks:
 1) get central frequency and populate in config.txt
 2) get sampling frequency and reference first packet for synchronization and populate in config.txt
 23 get packet number delay for dispersion and populate in config.txt
@@ -160,9 +160,11 @@ class PulsarInformationUtility:
         self.n_packet_integration = int(config.get('general-config', 'n_packet_integration'))
         self.last_sequence_number = int(config.get('general-config', 'last_sequence_number'))
         self.n_channels = int(config.get('general-config', 'n_channels'))
+        self.n_parts = int(config.get('general-config', 'n_parts'))
 
         self.band = None
         self.set_band_specific_from_config()
+        print("PulsarUtilityInformation initiated for pulsar: ", self.psr_name_date_time)
 
     def set_band_specific_from_config(self):
         read_config(self.config_filename)
@@ -232,7 +234,7 @@ class PulsarInformationUtility:
         print("Skip packets for dispersion delay compensation:")
         for i in range(n_bands):
             time_delay[i] = time_delay_2_packet_delay(calculate_time_delay(dm, i + 1, ref_band),
-                                                      self.band[i].sampling_frequency)
+                                                      self.band[i+1].sampling_frequency)
             print("ch:" + str(i + 1) + "	" + str(time_delay[i]))
 
         for i in range(1, n_bands + 1):
