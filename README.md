@@ -223,8 +223,7 @@ python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_11490
 ```
 
 Note:
-
-Setting the optional plotting parameters (-plotXX, -plotYY, -plotRealXY or -plotImagXY) will plot the selected dynamic spectra
+* Setting the optional plotting parameters (-plotXX, -plotYY, -plotRealXY or -plotImagXY) will plot the selected dynamic spectra
 after processing each part of mbr file. After this, the program will ask during runtime whether to continue plotting for subsequent parts(Y) or not(n). 
 The default is 'n'. That is, if a 'Y' is not provided, plotting will be suspended for subsequent parts.
 ## 5. Dynamic Spectrum to Time Series 
