@@ -141,4 +141,21 @@ There'll be a prompt to choose a option to populate config.txt.
 ```
 Choose a desired option by entering corresponding option value(1,2,3,4,5,Q or q)
 ## 4. MBR to Dynamic Spectrum 
+A Dynamic spectrum is simply intensity as a function of frequency and time. It can be constructed by calculating the 
+spectrum (intensity as a function of frequency) at different times. To calculate the spectrum, we take Fast Fourier Transform (FFT) 
+of 512 samples each in X polarization and Y polarization. Let X and Y be the resulting spectrum for x and y polarization. 
+Intensity spectrum for x polarization can be calculated as (X.X'), where X' denotes complex conjugate of X. Similarly, 
+intensity spectrum for y polarization can be calculated as (Y.Y'). Note that the intensity spectrum has 256 channels.
+The resulting intensity spectrum (Fig ****) forms a column of the dynamic spectrum with each column (i.e., spectrum) 
+taken at successive time intervals. Also note that the entire bandwidth of 16MHz is divided into 256 channels. 
+So, each channel is 6.25 KHz wide. We also calculate cross spectrum as (X.Y'). 
+
+<p align="center">
+  <img src="readmeImages/intensitySpectrum.png"/>
+</p>
+<p align="center">
+  <a>Figure 4.1: Intensity spectrum</a>
+  <br><br>
+</p>
+
 ## 5. Dynamic Spectrum to Time Series 
