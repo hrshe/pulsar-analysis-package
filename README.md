@@ -20,12 +20,13 @@ in my Thesis Report ([Drifting_Subpulse_Thesis.pdf](Drifting_Subpulse_Thesis.pdf
 The idea here is to use OOPs to build a simple data processing tool for pulsar data.
 
 ## Table of Contents
-1. [MBR to Dynamic Spectrum](#1-mbr-to-dynamic-spectrum)
-      * [Step 1: Packet Level Synchronization](#step-1-packet-level-synchronization)
-2. [Pulsar Information Utility](#2-pulsar-information-utility)
-3. [Dynamic Spectrum to Time Series](#3-dynamic-spectrum-to-time-series)
+1. [MBR data](#1-mbr-data)
+2. [Packet Level Synchronization](#2-packet-level-synchronization)
+3. [Pulsar Information Utility](#3-pulsar-information-utility)
+4. [MBR to Dynamic Spectrum](#4-mbr-to-dynamic-spectrum)
+5. [Dynamic Spectrum to Time Series](#5-dynamic-spectrum-to-time-series)
 
-## 1. MBR to Dynamic Spectrum
+## 1. MBR Data
 The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the 
 MBR along with a header are saved in '.mbr' files.
 These '.mbr' data files are to be placed in [MBRData directory](MBRData) channel wise (as shown below) for processing.
@@ -72,7 +73,7 @@ The recorded data also suffer from missing packets. These missing packets can be
 The missing packets were detected by keeping a count of number of packets read and comparing that to the packet number 
 present in the header of current packet being read.
 
-#### Step 1: Packet Level Synchronization
+## 2. Packet Level Synchronization
 For analysing signals received across all 10 frequency bands, it is extremely important that we synchronize the data 
 from each band. This would ensure that we compare and study pulse signals from different channels having the same origin
 at the pulsar.
