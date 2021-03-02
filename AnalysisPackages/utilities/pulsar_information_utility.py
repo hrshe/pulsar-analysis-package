@@ -1,5 +1,5 @@
 """
-To perform the following tasks:
+Performs the following tasks:
 1) get central frequency and populate in config.txt
 2) get sampling frequency and reference first packet for synchronization and populate in config.txt
 23 get packet number delay for dispersion and populate in config.txt
