@@ -115,7 +115,7 @@ Channel number and first packet of synchronization for all channels is saved in 
 [ChannelVsFirstPacket_\*PSRDetails\*.txt](AnalysisPackages/resources/ChannelVsFirstPacket_B0834+06_20090725_114903.txt)
 (AnalysisPackages/resources/ChannelVsFirstPacket_B0834+06_20090725_114903.txt)
 
-## 2. Pulsar Information Utility
+## 3. Pulsar Information Utility
 Idea behind this utility is to have a class which can be used to hold all configuration parameters and pulsar properties 
 at a single place. This class also has methods to populate the following band specific observation properties in 
 [config.txt](AnalysisPackages/resources/config.txt):
@@ -140,4 +140,5 @@ There'll be a prompt to choose a option to populate config.txt.
 5. Exit(enter Q or 5)
 ```
 Choose a desired option by entering corresponding option value(1,2,3,4,5,Q or q)
-## 3. Dynamic Spectrum to Time Series 
+## 4. Dynamic Spectrum to Time Series 
+## 5. Dynamic Spectrum to Time Series 
