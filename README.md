@@ -140,5 +140,5 @@ There'll be a prompt to choose a option to populate config.txt.
 5. Exit(enter Q or 5)
 ```
 Choose a desired option by entering corresponding option value(1,2,3,4,5,Q or q)
-## 4. Dynamic Spectrum to Time Series 
+## 4. MBR to Dynamic Spectrum 
 ## 5. Dynamic Spectrum to Time Series 
