@@ -284,7 +284,7 @@ def get_mbr_filename(root_dirname, file_name, channel_number, seq_number):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_name", type=str,
+    parser.add_argument("input_file_name", type=str,
                         help="The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)")
     parser.add_argument("-s", "--packetSynch", help="Do packet level synchronization across bands", action="store_true")
     parser.add_argument("-plotXX", "--plotXX", help="plot dynamic spectrum for X polarization after processing each part "
@@ -299,11 +299,12 @@ if __name__ == '__main__':
     parser.add_argument("-plotImagXY", "--plotImagXY", action="store_true",
                         help="plot dynamic spectrum for imaginary part of cross (X.Conjugate(Y)) after processing each "
                              "part of mbr file")
-    parser.add_argument("-psrUtil", "--psrUtil", help="run pulsar_information_utility for populating config file",
+    parser.add_argument("-psrUtil", "--psrUtil", help="run pulsar_information_utility for populating config file before "
+                                                      "computing the dynamic spectra",
                         action="store_true")
     parser.add_argument("-t", "--timer", help="print time taken to process each part of mbr file",
                         action="store_true")
 
     args = parser.parse_args()
-    main(args.file_name, args.packetSynch, args.plotXX, args.plotYY,
+    main(args.input_file_name, args.packetSynch, args.plotXX, args.plotYY,
          args.plotRealXY, args.plotImagXY, args.psrUtil, args.timer)

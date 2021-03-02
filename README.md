@@ -177,13 +177,13 @@ Performs the following tasks:
     mbr sequence "ch03_B0834+06_20090725_114903" will be saved in path: OutputData/B0834+06_20090725_114903/DynamicSpectrum/ch03/
 
 Usage:
-Run the following to view help on all optional comman line arguments
+Run the following command to view help on all optional command line arguments
 ```
 python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum -h
 ```
 Output describes how to use the command:
 ```
-usage: mbr2dynamicspectrum.py [-h] [-s] [-plotXX] [-plotYY] [-plotRealXY] [-plotImagXY] [-psrUtil] [-t] file_name
+usage: mbr2dynamicspectrum.py input_file_name [-h] [-s] [-plotXX] [-plotYY] [-plotRealXY] [-plotImagXY] [-psrUtil] [-t]
 
 positional arguments(necessary arguments):
   Argument:             Functionality:
@@ -199,7 +199,7 @@ optional arguments:
                         plot dynamic spectrum for real part of cross (X.Conjugate(Y)) after processing each part of mbr file
   -plotImagXY, --plotImagXY
                         plot dynamic spectrum for imaginary part of cross (X.Conjugate(Y)) after processing each part of mbr file
-  -psrUtil, --psrUtil   run pulsar_information_utility for populating config file
+  -psrUtil, --psrUtil   run pulsar_information_utility for populating the config file before computing the dynamic spectra
   -t, --timer           print time taken to process each part of mbr file
 
 ```
@@ -211,7 +211,7 @@ python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_11490
 ```
 
 For obtaining the dynamic spectrum with packet level synchronization across all bands we use teh following command. 
-Apart from the synchronization mentioned in [section 2](#2-packet-level-synchronization), this synchronization also includes 
+Apart from the synchronization mentioned in [Section 2](#2-packet-level-synchronization), this synchronization also includes 
 synchronization to compensate for dispersion delay across bands:
 ```
 python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_114903 -packetSynch
@@ -221,4 +221,10 @@ All optional parameters set to true:
 ```
 python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_114903 -packetSynch -plotXX -plotYY -plotRealXY -plotImagXY -runPsrUtility -psrUtil
 ```
+
+Note:
+
+Setting the optional plotting parameters (-plotXX, -plotYY, -plotRealXY or -plotImagXY) will plot the selected dynamic spectra
+after processing each part of mbr file. After this, the program will ask during runtime whether to continue plotting for subsequent parts(Y) or not(n). 
+The default is 'n'. That is, if a 'Y' is not provided, plotting will be suspended for subsequent parts.
 ## 5. Dynamic Spectrum to Time Series 
