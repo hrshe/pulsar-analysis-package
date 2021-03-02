@@ -211,7 +211,7 @@ python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_11490
 ```
 
 For obtaining the dynamic spectrum with packet level synchronization across all bands we use teh following command. 
-Apart from the synchronization mentioned in [Section 2](#2-packet-level-synchronization), this synchronization also includes 
+Apart from the synchronization mentioned in [Section 2](#2-packet-level-synchronization), this also includes 
 synchronization to compensate for dispersion delay across bands:
 ```
 python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_114903 -packetSynch
