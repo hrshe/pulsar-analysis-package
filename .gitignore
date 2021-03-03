@@ -9,6 +9,8 @@ __pycache__/
 # Manually added directories and files
 *.mbr
 *.spec
+*.dat
+*.prof
 
 # Distribution / packaging
 .idea

@@ -157,6 +157,7 @@ class PulsarInformationUtility:
         self.dm = float(config.get('pulsar-config', 'dm'))
         self.n_bands = int(config.get('pulsar-config', 'n_bands'))
 
+        self.sigma_threshold = int(config.get('general-config', 'sigma_threshold'))
         self.n_packet_integration = int(config.get('general-config', 'n_packet_integration'))
         self.last_sequence_number = int(config.get('general-config', 'last_sequence_number'))
         self.n_channels = int(config.get('general-config', 'n_channels'))

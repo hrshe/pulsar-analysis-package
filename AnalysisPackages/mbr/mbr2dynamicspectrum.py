@@ -19,7 +19,6 @@ All optional parameters set to true:
 """
 import warnings
 import time
-import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 
@@ -202,15 +201,15 @@ def save_spec_file_all(channel_number, dynamic_spectrum_cross, dynamic_spectrum_
 
 
 def save_spec_file(channel_number, dynamic_spectrum, file_name, root_dirname, seq_number, polarization, psr):
-    filename = open(get_output_filename(channel_number, file_name, root_dirname, seq_number, polarization, psr), "ab")
+    filename = open(get_output_filename(channel_number, root_dirname, seq_number, polarization, psr), "ab")
     np.savetxt(filename, dynamic_spectrum, fmt='%1.3f')
     print(f"saved SPEC file: {file_name}")
     filename.close()
 
 
-def get_output_filename(channel_number, file_name, root_dirname, seq_number, polarization, psr):
+def get_output_filename(channel_number, root_dirname, seq_number, polarization, psr):
     return root_dirname + f"OutputData/{psr.psr_name_date_time}/DynamicSpectrum/ch0{str(channel_number)}/" + \
-           file_name + '_' + polarization + '_' + "{0:0=3d}".format(seq_number) + ".spec"
+           f"ch0{str(channel_number)}_{psr.psr_name_date_time}"  + '_' + polarization + '_' + "{0:0=3d}".format(seq_number) + ".spec"
 
 
 def integrate_dynamic_spectrum_all(dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y,
@@ -230,12 +229,6 @@ def integrate_dynamic_spectrum(dynamic_spectrum_x, missing_packets_array, n_chan
         warnings.simplefilter("ignore", category=RuntimeWarning)
         dynamic_spectrum_x = np.nanmean(dynamic_spectrum_x, axis=0)
     return dynamic_spectrum_x
-
-
-def plot_DS(integrated_dynamic_spectrum):
-    plt.imshow(np.transpose(integrated_dynamic_spectrum), interpolation="nearest", aspect='auto')
-    plt.colorbar()
-    plt.show()
 
 
 def clean_dynamic_spectrum_all(dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y):

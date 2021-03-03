@@ -1,5 +1,5 @@
 [pulsar-config]
-period = 1273.485
+period = 1273
 dm = 12.45
 n_bands = 9
 
@@ -8,6 +8,7 @@ n_packet_integration = 60
 last_sequence_number = 3
 n_channels = 256
 n_parts = 16
+sigma_threshold = 3
 
 [folding-config]
 n_bins = 3000
