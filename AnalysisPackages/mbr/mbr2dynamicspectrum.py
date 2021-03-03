@@ -209,8 +209,8 @@ def save_spec_file(channel_number, dynamic_spectrum, file_name, root_dirname, se
 
 
 def get_output_filename(channel_number, file_name, root_dirname, seq_number, polarization, psr):
-    return root_dirname + f"OutputData/{psr.psr_name_date_time}/DynamicSpectrum/ch0{str(channel_number)}/" + file_name + '_' + polarization + '_' + "{0:0=3d}".format(
-        seq_number) + ".spec"
+    return root_dirname + f"OutputData/{psr.psr_name_date_time}/DynamicSpectrum/ch0{str(channel_number)}/" + \
+           file_name + '_' + polarization + '_' + "{0:0=3d}".format(seq_number) + ".spec"
 
 
 def integrate_dynamic_spectrum_all(dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y,

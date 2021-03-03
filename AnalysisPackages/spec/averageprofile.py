@@ -1,20 +1,13 @@
 import sys
-from itertools import islice
-import time
-from os.path import isfile
-from pathlib import Path
-
-import cv2
 
 import numpy as np
+from os.path import isfile
+from AnalysisPackages.utilities.pulsar_information_utility import PulsarInformationUtility
+from pathlib import Path
+import matplotlib.pyplot as plt
 
 from mbr.mbr2dynamicspectrum import plot_DS
 from utilities.bcolors import bcolors
-from utilities.pulsar_information_utility import PulsarInformationUtility
-
-"""
-Purpose of this file is to execute rough patches of code... Not to be included in final project
-"""
 
 
 def main(file_name, polarization):
@@ -27,6 +20,12 @@ def main(file_name, polarization):
     n_rows = 10000  # give proper name
     root_dirname = str(Path(__file__).parent.parent.parent.absolute()) + '/'
 
+    read_spec_and_process(channel_number, file_name, n_rows, polarization, psr, root_dirname, seq_number,
+                          time_quanta_count, process_dynamic_spectrum)
+
+
+def read_spec_and_process(channel_number, file_name, n_rows, polarization, psr, root_dirname, seq_number,
+                          time_quanta_count, process):
     carry_over_flag = False
     while True:
         spec_file_path = get_spec_file_name(root_dirname, file_name, psr, seq_number, channel_number, polarization)
@@ -58,7 +57,7 @@ def main(file_name, polarization):
                     break
                 else:
                     # process dynamic spectrum
-                    process_dynamic_spectrum(dyn_spec, psr, time_quanta_first, time_quanta_last)
+                    process(dyn_spec, psr, time_quanta_first, time_quanta_last)
                     print(dyn_spec.shape)
 
             seq_number = seq_number + 1
@@ -67,77 +66,10 @@ def main(file_name, polarization):
 def process_dynamic_spectrum(dynamic_spectrum, psr, time_quanta_first, time_quanta_last):
     ### Removing Bad RFI channels
     sigma_threshold = 3
-    n_bins = 1000
-    avg_pulse_prof_wo_robust = np.zeros((psr.n_channels, n_bins))
+
     dynamic_spectrum = remove_rfi(dynamic_spectrum, psr, sigma_threshold)
-    interpolate2d_old(dynamic_spectrum, time_quanta_first, avg_pulse_prof_wo_robust, psr, n_bins)
-    # plot_DS(dynamic_spectrum)
 
-
-def interpolate2d_new(dyn_spect, time_quanta_start, avg_pulse_prof_wo_robust, psr, n_bins):
-    n_channel = psr.n_channels
-    P = psr.period
-    n_int = psr.n_packet_integration
-    plot_DS(dyn_spect)
-
-    mean, rms = get_robust_mean_rms()
-
-    time_arr = np.zeros(dyn_spect.shape[0])
-    for t_count in range(time_arr.shape[0]):
-        time_arr[t_count] = (time_quanta_start + t_count) * 512 * n_int / 33000
-
-    interpolated = np.zeros((n_bins, n_channel))
-
-    for n_ch in range(dyn_spect.shape[1]):
-        np.interp(list(range(n_bins)), time_arr, dyn_spect[:, n_ch])
-    return 0
-
-
-def interpolate2d_old(a, time_quanta_start, avg_pulse_prof_wo_robust, psr, n_bins):
-    n_channel = psr.n_channels
-    P = psr.period
-    n_int = psr.n_packet_integration
-    # print(a)
-    # res1 = cv2.resize(a, dsize=(n_channel, n_bins), interpolation=cv2.INTER_LINEAR)
-    # print(res1)
-
-    # np.interp(list(range(n_bins)), time_series, dyn_spec[:, n_ch])
-
-    time_arr = np.zeros(a.shape[0])
-
-    for t_count in range(time_arr.shape[0]):
-        time_arr[t_count] = (time_quanta_start + t_count) * 512 * n_int / 33000
-    app_wo_robust = np.zeros((n_channel, n_bins))
-    app_count_wo_robust = np.zeros((n_channel, n_bins))
-    for t in range(a.shape[0]):
-        f_p = (time_arr[t] / P) - int(time_arr[t] / P)
-        n_bin = f_p * n_bins
-
-        j = int(n_bin)
-        if j == n_bins - 1:
-            k = 0
-        else:
-            k = j + 1
-        delta = n_bin - j
-
-        if 0 <= j < n_bins - 1:
-            for ch in range(a.shape[1]):
-                if not np.isnan(a[t, ch]):
-                    app_wo_robust[ch, j] = app_wo_robust[ch, j] + a[t, ch] * (1 - delta)
-                    app_wo_robust[ch, k] = app_wo_robust[ch, k] + a[t, ch] * delta
-                    app_count_wo_robust[ch, j] = app_count_wo_robust[ch, j] + 1 - delta
-                    app_count_wo_robust[ch, k] = app_count_wo_robust[ch, k] + delta
-
-    for row in range(avg_pulse_prof_wo_robust.shape[0]):
-        for col in range(avg_pulse_prof_wo_robust.shape[1]):
-            if app_count_wo_robust[row, col] > 0 and avg_pulse_prof_wo_robust[row, col] != 0:
-                avg_pulse_prof_wo_robust[row, col] = (avg_pulse_prof_wo_robust[row, col] + app_wo_robust[row, col] /
-                                                      app_count_wo_robust[row, col]) / 2
-            elif avg_pulse_prof_wo_robust[row, col] == 0 and app_count_wo_robust[row, col] > 0:
-                avg_pulse_prof_wo_robust[row, col] = app_wo_robust[row, col] / app_count_wo_robust[row, col]
-
-    # plot_DS(np.transpose(avg_pulse_prof_wo_robust))
-    print(avg_pulse_prof_wo_robust)
+    plot_DS(dynamic_spectrum)
 
 
 def remove_rfi(dynamic_spectrum, psr, sigma_threshold):
@@ -149,6 +81,18 @@ def remove_rfi(dynamic_spectrum, psr, sigma_threshold):
     mean_x, std_x = get_robust_mean_rms(efficiency_x[10:psr.n_channels - 10], sigma_threshold)
     dynamic_spectrum = np.where(abs(mean_x - efficiency_x) > sigma_threshold * std_x, np.nan, dynamic_spectrum)
     return dynamic_spectrum
+
+
+def get_robust_mean_rms_2d(arr):
+    '''
+    :param arr: a 2D array
+    computes mean across axis 0. (mean for each row)
+    :return: list of mean and rms. Each list is of dim arr.shape[1]
+    '''
+    mean, rms = np.zeros(arr.shape[1]), np.zeros(arr.shape[1])
+    for i in range(arr.shape[1]):
+        mean[i], rms[i] = get_robust_mean_rms(arr[:, i], 3)
+    return mean, rms
 
 
 def get_robust_mean_rms(input_arr, sigma_threshold):
