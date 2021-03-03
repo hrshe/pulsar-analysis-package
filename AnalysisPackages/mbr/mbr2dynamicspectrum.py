@@ -26,6 +26,7 @@ from AnalysisPackages.mbr import packet
 from os.path import getsize, isfile
 from pathlib import Path
 from AnalysisPackages.utilities.pulsar_information_utility import PulsarInformationUtility
+from AnalysisPackages.utilities.utils import plot_DS
 
 
 def main(file_name, synchronization_flag=False, plot_dynamic_spectrum_flag_xx=False,
