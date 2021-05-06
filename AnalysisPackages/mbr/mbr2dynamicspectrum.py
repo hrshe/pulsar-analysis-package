@@ -202,15 +202,16 @@ def save_spec_file_all(channel_number, dynamic_spectrum_cross, dynamic_spectrum_
 
 
 def save_spec_file(channel_number, dynamic_spectrum, file_name, root_dirname, seq_number, polarization, psr):
-    filename = open(get_output_filename(channel_number, root_dirname, seq_number, polarization, psr), "ab")
-    np.savetxt(filename, dynamic_spectrum, fmt='%1.3f')
+    filename = get_output_filename(channel_number, root_dirname, seq_number, polarization, psr)
+    file = open(filename, "ab")
+    np.savetxt(file, dynamic_spectrum, fmt='%1.3f')
     print(f"saved SPEC file: {file_name}")
-    filename.close()
+    file.close()
 
 
 def get_output_filename(channel_number, root_dirname, seq_number, polarization, psr):
     return root_dirname + f"OutputData/{psr.psr_name_date_time}/DynamicSpectrum/ch0{str(channel_number)}/" + \
-           f"ch0{str(channel_number)}_{psr.psr_name_date_time}"  + '_' + polarization + '_' + "{0:0=3d}".format(seq_number) + ".spec"
+           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".spec"
 
 
 def integrate_dynamic_spectrum_all(dynamic_spectrum_cross, dynamic_spectrum_x, dynamic_spectrum_y,
@@ -281,11 +282,13 @@ if __name__ == '__main__':
     parser.add_argument("input_file_name", type=str,
                         help="The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)")
     parser.add_argument("-s", "--packetSynch", help="Do packet level synchronization across bands", action="store_true")
-    parser.add_argument("-plotXX", "--plotXX", help="plot dynamic spectrum for X polarization after processing each part "
-                                                "of mbr file",
+    parser.add_argument("-plotXX", "--plotXX",
+                        help="plot dynamic spectrum for X polarization after processing each part "
+                             "of mbr file",
                         action="store_true")
-    parser.add_argument("-plotYY", "--plotYY", help="plot dynamic spectrum for Y polarization after processing each part "
-                                                "of mbr file",
+    parser.add_argument("-plotYY", "--plotYY",
+                        help="plot dynamic spectrum for Y polarization after processing each part "
+                             "of mbr file",
                         action="store_true")
     parser.add_argument("-plotRealXY", "--plotRealXY", action="store_true",
                         help="plot dynamic spectrum for real part of cross (X.Conjugate(Y)) after processing each part of "
@@ -293,8 +296,9 @@ if __name__ == '__main__':
     parser.add_argument("-plotImagXY", "--plotImagXY", action="store_true",
                         help="plot dynamic spectrum for imaginary part of cross (X.Conjugate(Y)) after processing each "
                              "part of mbr file")
-    parser.add_argument("-psrUtil", "--psrUtil", help="run pulsar_information_utility for populating config file before "
-                                                      "computing the dynamic spectra",
+    parser.add_argument("-psrUtil", "--psrUtil",
+                        help="run pulsar_information_utility for populating config file before "
+                             "computing the dynamic spectra",
                         action="store_true")
     parser.add_argument("-t", "--timer", help="print time taken to process each part of mbr file",
                         action="store_true")

@@ -4,6 +4,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def ch2freq(ch, cent_freq):
+    cf = cent_freq
+    bw = 16.5
+    return cf + (bw / 2) - (ch * bw / 255)
+
+
+def calculate_dispersion_delay(channel_number, psr, ref_ch):
+    cent_freq = psr.get_central_frequency(channel_number)
+    return 4.15 * 1000000 * psr.dm * ((1 / ch2freq(channel_number, cent_freq)) ** 2 - (1 / ch2freq(ref_ch, cent_freq)) ** 2)
+
+
+def time_delay_to_quanta(t, n_int):
+    return np.rint(t * (33000 / (512 * n_int)))
+
+
 def millisec2timequanta(t, psr):
     return int(t * 33000 / (psr.n_packet_integration * 512))
 
@@ -89,7 +104,7 @@ def interpolate2d_old(a, time_quanta_start, avg_pulse_prof_wo_robust, psr, n_bin
                 avg_pulse_prof_wo_robust[row, col] = app_wo_robust[row, col] / app_count_wo_robust[row, col]
 
 
-def remove_rfi(dynamic_spectrum, psr, sigma_threshold):
+def remove_rfi(dynamic_spectrum, psr):
     dynamic_spectrum[:, :10], dynamic_spectrum[:, psr.n_channels - 10:] = np.nan, np.nan
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)
@@ -97,8 +112,8 @@ def remove_rfi(dynamic_spectrum, psr, sigma_threshold):
     # option for robust mean/rms
     snr = float(np.sqrt(psr.n_packet_integration))
     efficiency_x = mean / rms * snr
-    mean_x, std_x = get_robust_mean_rms(efficiency_x[10:psr.n_channels - 10], sigma_threshold)
-    dynamic_spectrum = np.where(abs(mean_x - efficiency_x) > sigma_threshold * std_x, np.nan, dynamic_spectrum)
+    mean_x, std_x = get_robust_mean_rms(efficiency_x[10:psr.n_channels - 10], psr.sigma_threshold)
+    dynamic_spectrum = np.where(abs(mean_x - efficiency_x) > psr.sigma_threshold * std_x, np.nan, dynamic_spectrum)
     return dynamic_spectrum
 
 
@@ -143,3 +158,8 @@ def get_spec_file_name(root_dirname, psr, seq_number, channel_number, polarizati
     return root_dirname + f"OutputData/{psr.psr_name_date_time}/DynamicSpectrum/ch0{str(channel_number)}/" + \
            f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + '_' + "{0:0=3d}".format(
         seq_number) + ".spec"
+
+
+def get_average_pule_profile_filename(channel_number, root_dirname, polarization, psr):
+    return root_dirname + f"OutputData/{psr.psr_name_date_time}/AveragePulseProfile/ch0{str(channel_number)}/" + \
+           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".prof"

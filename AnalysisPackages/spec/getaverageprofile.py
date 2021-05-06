@@ -7,14 +7,15 @@ from AnalysisPackages.utilities.pulsar_information_utility import PulsarInformat
 from pathlib import Path
 
 from AnalysisPackages.utilities import utils
-from utilities.bcolors import bcolors
+from AnalysisPackages.utilities.bcolors import bcolors
+from AnalysisPackages.utilities.utils import get_average_pule_profile_filename
 
 
-def main(file_name, polarization):
-    psr = PulsarInformationUtility(file_name[5:])  # "B0834+06_20090725_114903"
+def main(file_name, ch_number, polarization):
+    psr = PulsarInformationUtility(file_name)  # "B0834+06_20090725_114903"
     seq_number = 0
     time_quanta_count = 0
-    channel_number = int(file_name[2:4])
+    channel_number = int(ch_number[2:4])
     n_rows = 10000  # give proper name
     root_dirname = str(Path(__file__).parent.parent.parent.absolute()) + '/'
 
@@ -68,11 +69,11 @@ def read_spec_and_process(channel_number, file_name, n_rows, polarization,
 
 def process_dynamic_spectrum(dynamic_spectrum, psr, time_quanta_first, plot_average_pulse_profile_flag,
                              root_dirname, seq_number, channel_number, polarization, avg_pulse_profile):
-    dynamic_spectrum = utils.remove_rfi(dynamic_spectrum, psr, psr.sigma_threshold)
+    dynamic_spectrum = utils.remove_rfi(dynamic_spectrum, psr)
     if plot_average_pulse_profile_flag:
         utils.interpolate2d_old(dynamic_spectrum, time_quanta_first, avg_pulse_profile, psr, avg_pulse_profile.shape[1])
-        output_filename = get_average_pule_profile_output_filename(channel_number, root_dirname,
-                                                                   polarization, psr)
+        output_filename = get_average_pule_profile_filename(channel_number, root_dirname,
+                                                            polarization, psr)
         np.savetxt(output_filename, avg_pulse_profile)
         print(f"{bcolors.OKGREEN}average pulse profile saved to: {output_filename}{bcolors.ENDC}")
         utils.plot_DS(np.transpose(avg_pulse_profile))
@@ -83,11 +84,5 @@ def process_dynamic_spectrum(dynamic_spectrum, psr, time_quanta_first, plot_aver
             exit()
 
 
-
-def get_average_pule_profile_output_filename(channel_number, root_dirname, polarization, psr):
-    return root_dirname + f"OutputData/{psr.psr_name_date_time}/AveragePulseProfile/ch0{str(channel_number)}/" + \
-           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".prof"
-
-
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2])  # ch03_B0834+06_20090725_114903 XX
+    main(sys.argv[1], sys.argv[2], sys.argv[3])  # B0834+06_20090725_114903 ch03 XX
