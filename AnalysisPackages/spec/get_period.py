@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #np.linspace(1272, 1275, 301)
-from AnalysisPackages.spec.getaveragepulse import main
+from AnalysisPackages.spec.get_averagepulse import main
 
 config = configparser.ConfigParser()
 

@@ -13,17 +13,21 @@ from AnalysisPackages.utilities.pulsar_information_utility import PulsarInformat
 
 
 def flag_nan_from_mask(spectrum, mask):
-    return spectrum*mask
+    return spectrum * mask
 
 
 def main(file_name, ch_number, polarization, pulse_width_spec):
     global channel_number
     global psr
 
+    decompression_method1 = True  # todo get from input
+    decompression_method2 = True  # todo get from input
+    chunk_rows = 5000  # todo get from input
+
     psr = PulsarInformationUtility(file_name)  # "B0834+06_20090725_114903"
     channel_number = int(ch_number[2:4])
     half_pulse_width_ch = int(round(psr.n_channels * int(pulse_width_spec) / 200))
-    chunk_rows = 5000
+
     end_spec_file_flag = False
     root_dirname = str(Path(__file__).parent.parent.parent.absolute()) + '/'
     time_quanta_start = 0
@@ -41,7 +45,9 @@ def main(file_name, ch_number, polarization, pulse_width_spec):
     overflow_buffer = create_nan_array(int(round(channel_to_column_delay[0])), psr.n_channels)
     overflow_buffer_flag = False
     intensities, global_time_series = np.array([]), np.array([])
-    mask = np.loadtxt(utils.get_pulse_mask_filename(channel_number, root_dirname, polarization, psr))
+
+    with open(utils.get_pulse_mask_filename(channel_number, root_dirname, polarization, psr), 'r') as mask_file:
+        mask = np.loadtxt(mask_file)
 
     with open(spec_file_path, 'r') as spec_file:
         while not end_spec_file_flag:
@@ -56,37 +62,11 @@ def main(file_name, ch_number, polarization, pulse_width_spec):
             # remove rfi
             dyn_spec = utils.remove_rfi(dyn_spec, psr)
 
-            # method 1 (ignore nearest x %)
-            template_offpulse_spectrum = utils.get_robust_mean_rms_2d(dyn_spec, psr.sigma_threshold)[0]
+            # decompression
             if True:
-                for index, spectrum in enumerate(dyn_spec):
-                    if np.isnan(spectrum).all():  # skip missing packets spectrum
-                        continue
-                    index_of_max = np.nanargmax(spectrum)
-                    flagged_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max, spectrum)
-                    flagged_template_offpulse_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max,
-                                                                             template_offpulse_spectrum)
-                    correction_factor = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
-                    dyn_spec[index] = spectrum / correction_factor
-
-            # todo - de compression
-            # method 2 (pulse mask)
-            template_offpulse_spectrum = utils.get_robust_mean_rms_2d(dyn_spec, psr.sigma_threshold)[0]
-            if True:
-                for index, spectrum in enumerate(dyn_spec):
-                    if np.isnan(spectrum).all():  # skip missing packets spectrum
-                        continue
-                    t = dyn_spec_time_series[index]
-                    fractional_ms_time_in_a_period = t - int(t/psr.period)*psr.period
-                    mask_index = int(round(ms_time_delay_to_time_quanta(fractional_ms_time_in_a_period, psr)))
-                    if mask_index >= mask.shape[0]:
-                        print(f"mask_index calculated: {mask_index} is greater than mask shape: {mask.shape}")
-                        mask_index = mask_index - 1
-
-                    flagged_spectrum = flag_nan_from_mask(spectrum, mask[mask_index])
-                    flagged_template_offpulse_spectrum = flag_nan_from_mask(template_offpulse_spectrum, mask[mask_index])
-                    correction_factor = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
-                    dyn_spec[index] = spectrum / correction_factor
+                template_offpulse_spectrum = utils.get_robust_mean_rms_2d(dyn_spec, psr.sigma_threshold)[0]
+                decompress(decompression_method1, decompression_method2, dyn_spec, template_offpulse_spectrum,
+                           dyn_spec_time_series, half_pulse_width_ch, mask, psr)
 
             # de disperse and add buffer
             dedispersed, overflow_buffer = de_disperse(dyn_spec, channel_to_column_delay,
@@ -112,6 +92,49 @@ def main(file_name, ch_number, polarization, pulse_width_spec):
         # np.savetxt(output_filename, average_pulse_profile)
         # print("average pulse profile saved in file: ", output_filename)
         # return average_pulse_profile
+
+
+def decompress(flag_method1, flag_method2, dyn_spec, template_offpulse_spectrum, dyn_spec_time_series,
+               half_pulse_width_ch, mask, psr):
+    for index, spectrum in enumerate(dyn_spec):
+        if np.isnan(spectrum).all():  # skip missing packets spectrum
+            continue
+        correction_factor_1, correction_factor_2 = 1, 1
+        # method 1
+        if flag_method1:
+            flagged_spectrum, flagged_template_offpulse_spectrum = get_flagged_spectra_decompression_1(
+                spectrum, template_offpulse_spectrum, half_pulse_width_ch)
+            correction_factor_1 = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
+        if correction_factor_1 != 1:
+            spectrum = spectrum / correction_factor_1
+
+        # method 2
+        if flag_method2:
+            t = dyn_spec_time_series[index]
+            flagged_spectrum, flagged_template_offpulse_spectrum = get_flagged_spectra_decompression_2(
+                spectrum, template_offpulse_spectrum, t, mask, psr)
+            correction_factor_2 = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
+        if correction_factor_2 != 1:
+            dyn_spec[index] = spectrum / correction_factor_2
+
+
+def get_flagged_spectra_decompression_2(spectrum, template_offpulse_spectrum, t, mask, psr):
+    fractional_ms_time_in_a_period = t - int(t / psr.period) * psr.period
+    mask_index = int(round(ms_time_delay_to_time_quanta(fractional_ms_time_in_a_period, psr)))
+    if mask_index >= mask.shape[0]:
+        print(f"mask_index calculated: {mask_index} is greater than mask shape: {mask.shape}")
+        mask_index = mask_index - 1
+    flagged_spectrum = flag_nan_from_mask(spectrum, mask[mask_index])
+    flagged_template_offpulse_spectrum = flag_nan_from_mask(template_offpulse_spectrum, mask[mask_index])
+    return flagged_spectrum, flagged_template_offpulse_spectrum
+
+
+def get_flagged_spectra_decompression_1(spectrum, template_offpulse_spectrum, half_pulse_width_ch):
+    index_of_max = np.nanargmax(spectrum)
+    flagged_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max, spectrum)
+    flagged_template_offpulse_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max,
+                                                             template_offpulse_spectrum)
+    return flagged_spectrum, flagged_template_offpulse_spectrum
 
 
 def flag_nan_near_index(half_width, index_of_max, spectrum):
