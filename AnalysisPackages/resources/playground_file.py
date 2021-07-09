@@ -28,6 +28,7 @@ def main(file_name, polarization):
     root_dirname = str(Path(__file__).parent.parent.parent.absolute()) + '/'
 
     carry_over_flag = False
+
     while True:
         spec_file_path = get_spec_file_name(root_dirname, file_name, psr, seq_number, channel_number, polarization)
         if not isfile(spec_file_path):

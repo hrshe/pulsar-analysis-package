@@ -214,12 +214,12 @@ For obtaining the dynamic spectrum with packet level synchronization across all 
 Apart from the synchronization mentioned in [Section 2](#2-packet-level-synchronization), this also includes 
 synchronization to compensate for dispersion delay across bands:
 ```
-python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_114903 -packetSynch
+python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_114903 --packetSynch
 ```
 
 All optional parameters set to true:
 ```
-python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_114903 -packetSynch -plotXX -plotYY -plotRealXY -plotImagXY -runPsrUtility -psrUtil
+python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_114903 --packetSynch -plotXX -plotYY -plotRealXY -plotImagXY -runPsrUtility -psrUtil
 ```
 
 Note:

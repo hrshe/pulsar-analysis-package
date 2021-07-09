@@ -44,9 +44,6 @@ def main(file_name, synchronization_flag=False, plot_dynamic_spectrum_flag_xx=Fa
     first_packet_flag = True
     channel_number = int(file_name[2:4])
     root_dirname = str(Path(__file__).parent.parent.parent.absolute()) + '/'
-    current_mbr_filename = get_mbr_filename(root_dirname, file_name, channel_number, seq_number)
-    mbr_filesize = getsize(current_mbr_filename)
-    packets_in_mbr_file = int(mbr_filesize / packet.packetSize)
     missing_packets_array = np.empty(psr.n_channels * 2)
     missing_packets_array.fill(np.nan)
     skip_to_n_packets = int(psr.band[channel_number].sync_first_packet) + \
@@ -57,6 +54,9 @@ def main(file_name, synchronization_flag=False, plot_dynamic_spectrum_flag_xx=Fa
     if timer_flag:
         time_arr = []
     while True:
+        current_mbr_filename = get_mbr_filename(root_dirname, file_name, channel_number, seq_number)
+        mbr_filesize = getsize(current_mbr_filename)
+        packets_in_mbr_file = int(mbr_filesize / packet.packetSize)
         mbr_file = read_mbr_file(current_mbr_filename)
 
         for part_i in range(psr.n_parts):
@@ -205,7 +205,7 @@ def save_spec_file(channel_number, dynamic_spectrum, file_name, root_dirname, se
     filename = get_output_filename(channel_number, root_dirname, seq_number, polarization, psr)
     file = open(filename, "ab")
     np.savetxt(file, dynamic_spectrum, fmt='%1.3f')
-    print(f"saved SPEC file: {file_name}")
+    print(f"saved SPEC file: {filename}")
     file.close()
 
 

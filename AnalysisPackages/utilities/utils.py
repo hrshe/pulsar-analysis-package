@@ -10,17 +10,25 @@ def ch2freq(ch, cent_freq):
     return cf + (bw / 2) - (ch * bw / 255)
 
 
-def calculate_dispersion_delay(channel_number, psr, ref_ch):
-    cent_freq = psr.get_central_frequency(channel_number)
-    return 4.15 * 1000000 * psr.dm * ((1 / ch2freq(channel_number, cent_freq)) ** 2 - (1 / ch2freq(ref_ch, cent_freq)) ** 2)
+def timequanta_to_millisec(n, psr, channel_number):
+    return (n * 512 * psr.n_packet_integration) / (psr.band[channel_number].sampling_frequency * 1000)
+
+
+# def calculate_dispersion_delay(channel_number, psr, ref_ch):
+#     cent_freq = psr.get_central_frequency(channel_number)
+#     return 4.15 * 1000000 * psr.dm * (
+#             (1 / ch2freq(channel_number, cent_freq)) ** 2 - (1 / ch2freq(ref_ch, cent_freq)) ** 2)
 
 
 def time_delay_to_quanta(t, n_int):
     return np.rint(t * (33000 / (512 * n_int)))
 
 
-def millisec2timequanta(t, psr):
-    return int(t * 33000 / (psr.n_packet_integration * 512))
+# def millisec2timequanta(t, psr, channel_number):
+#     return int(t * psr.band[channel_number].sampling_frequency * 1000 / (psr.n_packet_integration * 512))
+
+def ms_time_delay_to_time_quanta(t, channel_number, psr):
+    return t * ((psr.band[channel_number].sampling_frequency * 1000) / (512 * psr.n_packet_integration))
 
 
 def get_robust_mean_rms_2d(arr, sigma_threshold):
@@ -43,7 +51,7 @@ def interpolate2d_new(dyn_spect, time_quanta_start, avg_pulse_prof_wo_robust, ps
     P = psr.period
 
     n_int = psr.n_packet_integration
-    replace_nan_with_mean(dyn_spect)
+    replace_nan_with_mean(dyn_spect, psr.sigma_threshold)
     time_arr = np.zeros(dyn_spect.shape[0])
     for t_count in range(time_arr.shape[0]):
         time_arr[t_count] = (time_quanta_start + t_count) * 512 * n_int / 33000
@@ -56,14 +64,14 @@ def interpolate2d_new(dyn_spect, time_quanta_start, avg_pulse_prof_wo_robust, ps
     return 0
 
 
-def plot_DS(integrated_dynamic_spectrum):
-    plt.imshow(np.transpose(integrated_dynamic_spectrum), interpolation="nearest", aspect='auto')
+def plot_DS(integrated_dynamic_spectrum, color='gray'):
+    plt.imshow(np.transpose(integrated_dynamic_spectrum), interpolation="nearest", aspect='auto', cmap=color)
     plt.colorbar()
     plt.show()
 
 
-def replace_nan_with_mean(dyn_spec):
-    mean, rms = get_robust_mean_rms_2d(dyn_spec, 3)
+def replace_nan_with_mean(dyn_spec, sigma_threshold):
+    mean, rms = get_robust_mean_rms_2d(dyn_spec, sigma_threshold)
     mean_of_mean = np.nanmean(mean)
     mean = np.where(np.isnan(mean), mean_of_mean, mean)
     nan_indices = np.where(np.isnan(dyn_spec))
@@ -117,15 +125,16 @@ def remove_rfi(dynamic_spectrum, psr):
     return dynamic_spectrum
 
 
-def get_robust_mean_rms_2d(arr):
+def get_robust_mean_rms_2d(arr, sigma_threshold):
     '''
+    :param sigma_threshold:
     :param arr: a 2D array
     computes mean across axis 0. (mean for each row)
     :return: list of mean and rms. Each list is of dim arr.shape[1]
     '''
     mean, rms = np.zeros(arr.shape[1]), np.zeros(arr.shape[1])
     for i in range(arr.shape[1]):
-        mean[i], rms[i] = get_robust_mean_rms(arr[:, i], 3)
+        mean[i], rms[i] = get_robust_mean_rms(arr[:, i], sigma_threshold)
     return mean, rms
 
 
@@ -154,12 +163,20 @@ def get_robust_mean_rms(input_arr, sigma_threshold):
     return mean, rms
 
 
-def get_spec_file_name(root_dirname, psr, seq_number, channel_number, polarization):
+def get_spec_file_name(root_dirname, psr, channel_number, polarization):
     return root_dirname + f"OutputData/{psr.psr_name_date_time}/DynamicSpectrum/ch0{str(channel_number)}/" + \
-           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + '_' + "{0:0=3d}".format(
-        seq_number) + ".spec"
+           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".spec"
 
 
 def get_average_pule_profile_filename(channel_number, root_dirname, polarization, psr):
     return root_dirname + f"OutputData/{psr.psr_name_date_time}/AveragePulseProfile/ch0{str(channel_number)}/" + \
            f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".prof"
+
+
+def get_average_pulse_file_name(root_dirname, psr, channel_number, polarization):
+    return root_dirname + f"OutputData/{psr.psr_name_date_time}/DynamicSpectrum/ch0{str(channel_number)}/" + \
+           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".app"
+
+def get_pulse_mask_filename(channel_number, root_dirname, polarization, psr):
+    return root_dirname + f"OutputData/{psr.psr_name_date_time}/DynamicSpectrum/ch0{str(channel_number)}/" + \
+           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".mask"
