@@ -10,9 +10,10 @@ from AnalysisPackages.utilities.bcolors import bcolors
 from AnalysisPackages.utilities.pulsar_information_utility import PulsarInformationUtility
 
 
+# repeat
 def get_channel_frequency(psr, channel_number):
     central_frequency = psr.band[channel_number].central_frequency
-    band_width = psr.band[3].sampling_frequency / 2
+    band_width = psr.band[channel_number].sampling_frequency / 2
     return np.array([central_frequency + (band_width / 2) - (ch * band_width / (psr.n_channels - 1)) for ch in
                      range(psr.n_channels)])
 
@@ -59,7 +60,7 @@ def main(file_name, ch_number, polarization, bins):
 
     dm_initial = psr.dm
     dm_linspace = np.linspace(dm_initial - 3, dm_initial + 3, 601)
-    #dm_linspace = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12.88])
+    # dm_linspace = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12.88])
     result = np.zeros(dm_linspace.shape)
 
     for i in range(dm_linspace.shape[0]):
@@ -81,8 +82,9 @@ def main(file_name, ch_number, polarization, bins):
             axis[1].plot(np.linspace(0, 1, 1000), integrated)
             axis[1].xaxis.set_label_position('bottom')
             axis[1].set_xlabel("Frequency Integrated")
-            axis[1].axis(xmin=0, xmax=1, ymax = 36.7, ymin=29.9)
-            axis[1].text(0.9, 0.5, "DM = "+str(round(dm_linspace[i], 2)), horizontalalignment='center', verticalalignment='center',
+            axis[1].axis(xmin=0, xmax=1, ymax=36.7, ymin=29.9)
+            axis[1].text(0.9, 0.5, "DM = " + str(round(dm_linspace[i], 2)), horizontalalignment='center',
+                         verticalalignment='center',
                          transform=axis[1].transAxes)
             plt.show()
 

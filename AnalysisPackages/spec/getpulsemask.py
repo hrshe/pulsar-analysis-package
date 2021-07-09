@@ -62,6 +62,7 @@ def main(file_name, ch_number, polarization):
         temp = np.array(np.roll(mask[ch, :], col_delay))
         mask[ch, :] = temp
 
+    utils.plot_DS(mask.T)
     np.savetxt(utils.get_pulse_mask_filename(ch_number, root_dirname, polarization, psr), np.transpose(mask), fmt='%1.1f')
 
     plt.figure("average pulse profile " + psr_name + " " + str(ch_number) + " " + polarization)

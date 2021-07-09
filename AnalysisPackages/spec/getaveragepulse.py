@@ -24,7 +24,7 @@ def main(file_name, ch_number, polarization):
     channel_number = int(ch_number[2:4])
     bins = int(round(ms_time_delay_to_time_quanta(psr.period, psr)))
     average_pulse_profile = create_nan_array(bins, psr.n_channels)
-    specfile_chunk_size = 15000  # give proper name (this is chunk size)
+    specfile_chunk_size = 5000  # give proper name (this is chunk size)
     end_spec_file_flag = False
     root_dirname = str(Path(__file__).parent.parent.parent.absolute()) + '/'
     time_quanta_start = 0
@@ -56,10 +56,12 @@ def main(file_name, ch_number, polarization):
             continue_flag = True if (input("continue folding?").lower() == "y") else False
             if not continue_flag:
                 break
+            if end_spec_file_flag:
+                break
 
         utils.plot_DS(average_pulse_profile)
         output_filename = utils.get_average_pulse_file_name(root_dirname, psr, channel_number, polarization)
-        #np.savetxt(output_filename, average_pulse_profile)
+        np.savetxt(output_filename, average_pulse_profile)
         print("average pulse profile saved in file: ", output_filename)
         # return average_pulse_profile
 

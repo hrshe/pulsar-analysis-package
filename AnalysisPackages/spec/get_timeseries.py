@@ -58,16 +58,16 @@ def main(file_name, ch_number, polarization, pulse_width_spec):
 
             # method 1 (ignore nearest x %)
             template_offpulse_spectrum = utils.get_robust_mean_rms_2d(dyn_spec, psr.sigma_threshold)[0]
-            # if False:
-            #     for index, spectrum in enumerate(dyn_spec):
-            #         if np.isnan(spectrum).all():  # skip missing packets spectrum
-            #             continue
-            #         index_of_max = np.nanargmax(spectrum)
-            #         flagged_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max, spectrum)
-            #         flagged_template_offpulse_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max,
-            #                                                                  template_offpulse_spectrum)
-            #         correction_factor = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
-            #         dyn_spec[index] = spectrum / correction_factor
+            if True:
+                for index, spectrum in enumerate(dyn_spec):
+                    if np.isnan(spectrum).all():  # skip missing packets spectrum
+                        continue
+                    index_of_max = np.nanargmax(spectrum)
+                    flagged_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max, spectrum)
+                    flagged_template_offpulse_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max,
+                                                                             template_offpulse_spectrum)
+                    correction_factor = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
+                    dyn_spec[index] = spectrum / correction_factor
 
             # todo - de compression
             # method 2 (pulse mask)
