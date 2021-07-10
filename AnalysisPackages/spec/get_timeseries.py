@@ -5,21 +5,21 @@ import numpy as np
 
 from os.path import isfile
 from itertools import islice
+from contextlib import ExitStack
 import matplotlib.pyplot as plt
 
 from AnalysisPackages.utilities import utils
 from AnalysisPackages.utilities.bcolors import bcolors
 from AnalysisPackages.utilities.pulsar_information_utility import PulsarInformationUtility
 
-
-def flag_nan_from_mask(spectrum, mask):
-    return spectrum * mask
+polarizations = ["XX", "YY"]
 
 
 def main(file_name, ch_number, polarization, pulse_width_spec):
     global channel_number
     global psr
 
+    polarization = polarization.upper()
     decompression_method1 = True  # todo get from input
     decompression_method2 = True  # todo get from input
     chunk_rows = 5000  # todo get from input
@@ -36,27 +36,29 @@ def main(file_name, ch_number, polarization, pulse_width_spec):
     channel_to_time_delay_array = get_time_delay_array(channel_to_frequency_array)
     channel_to_column_delay = ms_time_delay_to_time_quanta(channel_to_time_delay_array, psr)
 
-    spec_file_path = utils.get_spec_file_name(root_dirname, psr, channel_number, polarization)
-    if not isfile(spec_file_path):
-        print(f"{bcolors.FAIL}file '{spec_file_path}' does not exist.\nExiting...{bcolors.ENDC}")
-        exit()
-    print(f"reading file {spec_file_path[112:]}")
+    spec_file_paths = get_spec_file_paths(channel_number, polarization, psr, root_dirname)
+
+    gain_correction_factor = get_gain_correction_factor(channel_number, psr, root_dirname)
 
     overflow_buffer = create_nan_array(int(round(channel_to_column_delay[0])), psr.n_channels)
     overflow_buffer_flag = False
     intensities, global_time_series = np.array([]), np.array([])
 
-    with open(utils.get_pulse_mask_filename(channel_number, root_dirname, polarization, psr), 'r') as mask_file:
-        mask = np.loadtxt(mask_file)
+    pulse_mask = get_pulse_mask(channel_number, polarization, psr, root_dirname)
 
-    with open(spec_file_path, 'r') as spec_file:
+    with ExitStack() as stack:
+        spec_files = [stack.enter_context(open(filename, 'r'))
+                      for filename in spec_file_paths]
+
         while not end_spec_file_flag:
-            # read file
-            dyn_spec, end_spec_file_flag = read_spec_file(end_spec_file_flag, chunk_rows, spec_file)
+            # read spec file and get dyn spec (gain corrected dyn spectrum incase of 'Q'
+            dyn_spec, end_spec_file_flag = get_dyn_spec(chunk_rows, end_spec_file_flag, gain_correction_factor,
+                                                        polarization, spec_files)
 
             # get time series in mili seconds and update next time quanta start
             dyn_spec_time_series = get_time_array(time_quanta_start, dyn_spec.shape[0])
             global_time_series = np.append(global_time_series, dyn_spec_time_series)
+            print(f"... for time quanta start: {time_quanta_start}")
             time_quanta_start = time_quanta_start + dyn_spec.shape[0]
 
             # remove rfi
@@ -66,7 +68,7 @@ def main(file_name, ch_number, polarization, pulse_width_spec):
             if True:
                 template_offpulse_spectrum = utils.get_robust_mean_rms_2d(dyn_spec, psr.sigma_threshold)[0]
                 decompress(decompression_method1, decompression_method2, dyn_spec, template_offpulse_spectrum,
-                           dyn_spec_time_series, half_pulse_width_ch, mask, psr)
+                           dyn_spec_time_series, half_pulse_width_ch, pulse_mask, psr)
 
             # de disperse and add buffer
             dedispersed, overflow_buffer = de_disperse(dyn_spec, channel_to_column_delay,
@@ -78,7 +80,7 @@ def main(file_name, ch_number, polarization, pulse_width_spec):
             intensities = np.append(intensities, np.nanmean(dedispersed, axis=1))
 
             # plot DS and corresponding TS
-            if True:
+            if False:
                 plot_DS_and_TS(dedispersed, intensities[-1 * chunk_rows:], dyn_spec.shape[0])
 
             overflow_buffer_flag = True
@@ -92,6 +94,71 @@ def main(file_name, ch_number, polarization, pulse_width_spec):
         # np.savetxt(output_filename, average_pulse_profile)
         # print("average pulse profile saved in file: ", output_filename)
         # return average_pulse_profile
+
+
+def get_pulse_mask(channel_number, polarization, psr, root_dirname):
+    if polarization in polarizations:
+        with open(utils.get_pulse_mask_filename(channel_number, root_dirname, polarization, psr), 'r') as mask_file:
+            mask = np.loadtxt(mask_file)
+    elif polarization == "I":
+        with open(utils.get_pulse_mask_filename(channel_number, root_dirname, polarizations[0], psr), 'r') as mask_file:
+            mask = np.loadtxt(mask_file)
+    return mask
+
+
+def flag_nan_from_mask(spectrum, mask):
+    return spectrum * mask
+
+
+def get_stokes_I(chunk_rows, spec_files, gain_correction_factor):
+    dyn_spec_x, end_spec_file_flag_x = read_spec_file(chunk_rows, spec_files[0])
+    dyn_spec_y, end_spec_file_flag_y = read_spec_file(chunk_rows, spec_files[1])
+
+    dyn_spec_x = dyn_spec_x * gain_correction_factor
+
+    return dyn_spec_x + dyn_spec_y, end_spec_file_flag_x and end_spec_file_flag_y
+
+
+def get_dyn_spec(chunk_rows, end_spec_file_flag, gain_correction_factor, polarization, spec_files):
+    # read file for single polarization
+    if polarization in polarizations:
+        dyn_spec, end_spec_file_flag = read_spec_file(chunk_rows, spec_files[0])
+    # read files for XX and YY, gain correct them and return Q = XX + YY
+    elif polarization == 'I':
+        dyn_spec, end_spec_file_flag = get_stokes_I(chunk_rows, spec_files,
+                                                    gain_correction_factor)
+    return dyn_spec, end_spec_file_flag
+
+
+def get_gain_correction_factor(channel_number, psr, root_dirname):
+    average_spectrum_paths = [utils.get_average_spectrum_filename(channel_number, root_dirname, polarization, psr)
+                              for polarization in polarizations]
+    with open(average_spectrum_paths[0], 'r') as average_spectrum_file_x, \
+            open(average_spectrum_paths[1], 'r') as average_spectrum_file_y:
+        average_spectra = [np.loadtxt(average_spectrum_file_x), np.loadtxt(average_spectrum_file_y)]
+    average_spectrum_x = average_spectra[0]
+    average_spectrum_y = average_spectra[1]
+    gain_correction_factor = average_spectrum_y / average_spectrum_x
+    return gain_correction_factor
+
+
+def get_spec_file_paths(channel_number, polarization, psr, root_dirname):
+    spec_file_paths = []
+    if polarization in polarizations:
+        spec_file_paths.append(utils.get_spec_file_name(root_dirname, psr, channel_number, polarization))
+    elif polarization == 'I':
+        for polarization in polarizations:
+            spec_file_paths.append(utils.get_spec_file_name(root_dirname, psr, channel_number, polarization))
+    else:
+        print(f"{bcolors.FAIL}polarization: '{polarization}' is not valid. \nExiting...{bcolors.ENDC}")
+        exit()
+    for spec_file_path in spec_file_paths:
+        if not isfile(spec_file_path):
+            print(f"{bcolors.FAIL}file '{spec_file_path}' does not exist.\nExiting...{bcolors.ENDC}")
+            exit()
+        else:
+            print(f"reading file {spec_file_path}")
+    return spec_file_paths
 
 
 def decompress(flag_method1, flag_method2, dyn_spec, template_offpulse_spectrum, dyn_spec_time_series,
@@ -122,7 +189,6 @@ def get_flagged_spectra_decompression_2(spectrum, template_offpulse_spectrum, t,
     fractional_ms_time_in_a_period = t - int(t / psr.period) * psr.period
     mask_index = int(round(ms_time_delay_to_time_quanta(fractional_ms_time_in_a_period, psr)))
     if mask_index >= mask.shape[0]:
-        print(f"mask_index calculated: {mask_index} is greater than mask shape: {mask.shape}")
         mask_index = mask_index - 1
     flagged_spectrum = flag_nan_from_mask(spectrum, mask[mask_index])
     flagged_template_offpulse_spectrum = flag_nan_from_mask(template_offpulse_spectrum, mask[mask_index])
@@ -171,7 +237,7 @@ def plot_DS_and_TS(DS, intensities, n_rows):
     axis[1].plot(np.linspace(0, n_rows - 1, n_rows), intensities)
     axis[1].xaxis.set_label_position('bottom')
     axis[1].set_xlabel("Frequency Integrated")
-    axis[1].axis(xmin=0, xmax=n_rows, ymax=10, ymin=-5)
+    axis[1].axis(xmin=0, xmax=n_rows, ymax=19, ymin=-5)
     plt.show()
 
 
@@ -189,12 +255,14 @@ def get_time_array(time_quanta_start, n_rows):
     return time_array
 
 
-def read_spec_file(end_spec_file_flag, n_rows, spec_file):
+def read_spec_file(n_rows, spec_file):
     dyn_spec = np.genfromtxt(islice(spec_file, n_rows), dtype=float)
-    print("spec file read. dyn_spec shape:", dyn_spec.shape)
+    print(f"spec file read. dyn_spec shape:{dyn_spec.shape}", end=" ")
     if dyn_spec.shape[0] < n_rows:
         print("eof for spec file reached")
         end_spec_file_flag = True
+    else:
+        end_spec_file_flag = False
 
     return dyn_spec, end_spec_file_flag
 

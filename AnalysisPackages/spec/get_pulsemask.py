@@ -65,14 +65,12 @@ def main(file_name, ch_number, polarization):
     utils.plot_DS(mask.T)
     np.savetxt(utils.get_pulse_mask_filename(ch_number, root_dirname, polarization, psr), np.transpose(mask), fmt='%1.1f')
 
-    plt.figure("average pulse profile " + psr_name + " " + str(ch_number) + " " + polarization)
-    plt.imshow(app, interpolation="nearest")
-    plt.title("average pulse profile " + psr_name + " " + str(ch_number) + " " + polarization)
-
-    plt.figure("Profile Mask " + psr_name + " " + str(ch_number) + " " + polarization)
-    plt.imshow(mask, interpolation="nearest")
-    plt.title("Profile Mask " + psr_name + " " + str(ch_number) + " " + polarization)
+    masked_app = (app*mask).T
+    average_spectrum = np.nanmean(masked_app, axis=0)
+    plt.plot(average_spectrum)
     plt.show()
+    np.savetxt(utils.get_average_spectrum_filename(ch_number, root_dirname, polarization, psr), average_spectrum, fmt='%1.1f')
+
 
     # print("Now Computing Spectrum Template")
     #

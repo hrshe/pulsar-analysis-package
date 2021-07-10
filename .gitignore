@@ -11,6 +11,9 @@ __pycache__/
 *.spec
 *.dat
 *.prof
+*.app
+*.avs
+*.mask
 
 # Distribution / packaging
 .idea
