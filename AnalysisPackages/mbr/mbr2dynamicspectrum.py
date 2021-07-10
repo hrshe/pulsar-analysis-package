@@ -17,6 +17,7 @@ In most cases, we will run:
 All optional parameters set to true:
 > python3 -m AnalysisPackages.mbr.mbr2dynamicspectrum ch03_B0834+06_20090725_114903 -packetSynch -plotXX -plotYY -plotRealXY -plotImagXY -runPsrUtility -psrUtil
 """
+import os
 import warnings
 import time
 import numpy as np
@@ -25,8 +26,13 @@ import argparse
 from AnalysisPackages.mbr import packet
 from os.path import getsize, isfile
 from pathlib import Path
+
+from AnalysisPackages.utilities import utils
+from AnalysisPackages.utilities.bcolors import bcolors
 from AnalysisPackages.utilities.pulsar_information_utility import PulsarInformationUtility
 from AnalysisPackages.utilities.utils import plot_DS
+
+polarizations = ["XX", "YY", "realXY", "imagXY"]
 
 
 def main(file_name, synchronization_flag=False, plot_dynamic_spectrum_flag_xx=False,
@@ -50,6 +56,9 @@ def main(file_name, synchronization_flag=False, plot_dynamic_spectrum_flag_xx=Fa
                         int(psr.band[channel_number].sync_dispersion_delay_packet)
     plot_dynamic_spectra_flag = plot_dynamic_spectrum_flag_xx or plot_dynamic_spectrum_flag_yy or \
                                 plot_dynamic_spectrum_flag_realxy or plot_dynamic_spectrum_flag_yy
+
+    # check if output data already exists and ask to delete it
+    check_existing_spec_data(root_dirname, channel_number, psr)
 
     if timer_flag:
         time_arr = []
@@ -157,10 +166,25 @@ def main(file_name, synchronization_flag=False, plot_dynamic_spectrum_flag_xx=Fa
             if timer_flag:
                 timer_util(part_i, psr, start, time_arr)
 
+        print(f"closing mbr file: {mbr_file.name}")
+        mbr_file.close()
         seq_number = seq_number + 1
         if not isfile(get_mbr_filename(root_dirname, file_name, channel_number, seq_number)) \
                 or seq_number > psr.last_sequence_number:
             break
+
+
+def check_existing_spec_data(root_dirname, channel_number, psr):
+    for polarization in polarizations:
+        spec_file_path = utils.get_spec_file_name(root_dirname, psr, channel_number, polarization)
+        if isfile(spec_file_path):
+            user_input = input(f"{bcolors.FAIL}spec file:{spec_file_path}\n"
+                               f"{bcolors.OKGREEN}already exists... delete existing and process again?{bcolors.ENDC}").lower()
+            if user_input == 'y':
+                os.remove(spec_file_path)
+                print(f"removed spec file: {spec_file_path}")
+            else:
+                exit()
 
 
 def timer_util(part_i, psr, start, time_arr):
@@ -203,8 +227,8 @@ def save_spec_file_all(channel_number, dynamic_spectrum_cross, dynamic_spectrum_
 
 def save_spec_file(channel_number, dynamic_spectrum, file_name, root_dirname, seq_number, polarization, psr):
     filename = get_output_filename(channel_number, root_dirname, seq_number, polarization, psr)
-    file = open(filename, "ab")
-    np.savetxt(file, dynamic_spectrum, fmt='%1.3f')
+    with open(filename, "ab") as file:
+        np.savetxt(file, dynamic_spectrum, fmt='%1.3f')
     print(f"saved SPEC file: {filename}")
     file.close()
 

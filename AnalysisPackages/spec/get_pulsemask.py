@@ -2,6 +2,7 @@
 Old code... not refactored
 todo : need to refactor this code
 """
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -66,7 +67,9 @@ def main(file_name, ch_number, polarization):
     np.savetxt(utils.get_pulse_mask_filename(ch_number, root_dirname, polarization, psr), np.transpose(mask), fmt='%1.1f')
 
     masked_app = (app*mask).T
-    average_spectrum = np.nanmean(masked_app, axis=0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        average_spectrum = np.nanmean(masked_app, axis=0)
     plt.plot(average_spectrum)
     plt.show()
     np.savetxt(utils.get_average_spectrum_filename(ch_number, root_dirname, polarization, psr), average_spectrum, fmt='%1.1f')

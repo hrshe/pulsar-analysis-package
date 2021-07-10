@@ -1,4 +1,5 @@
 import sys
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -38,7 +39,9 @@ def main(file_name, ch_number, polarization, pulse_width_spec):
 
     spec_file_paths = get_spec_file_paths(channel_number, polarization, psr, root_dirname)
 
-    gain_correction_factor = get_gain_correction_factor(channel_number, psr, root_dirname)
+    gain_correction_factor = 1
+    if polarization not in polarizations:
+        gain_correction_factor = get_gain_correction_factor(channel_number, psr, root_dirname)
 
     overflow_buffer = create_nan_array(int(round(channel_to_column_delay[0])), psr.n_channels)
     overflow_buffer_flag = False
@@ -58,7 +61,7 @@ def main(file_name, ch_number, polarization, pulse_width_spec):
             # get time series in mili seconds and update next time quanta start
             dyn_spec_time_series = get_time_array(time_quanta_start, dyn_spec.shape[0])
             global_time_series = np.append(global_time_series, dyn_spec_time_series)
-            print(f"... for time quanta start: {time_quanta_start}")
+            print(f"read till time quanta: {time_quanta_start} -> {round(dyn_spec_time_series[-1], 2)} ms")
             time_quanta_start = time_quanta_start + dyn_spec.shape[0]
 
             # remove rfi
@@ -77,22 +80,24 @@ def main(file_name, ch_number, polarization, pulse_width_spec):
             subtract_robust_mean(dedispersed, psr.sigma_threshold)
 
             # freq integrate to find intensities and append to global array
-            intensities = np.append(intensities, np.nanmean(dedispersed, axis=1))
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                intensities = np.append(intensities, np.nanmean(dedispersed, axis=1))
 
             # plot DS and corresponding TS
             if False:
                 plot_DS_and_TS(dedispersed, intensities[-1 * chunk_rows:], dyn_spec.shape[0])
 
             overflow_buffer_flag = True
-            print(time_quanta_start)
 
         plt.plot(global_time_series, intensities)
         plt.show()
 
-        # todo - save data
-        # output_filename = utils.get_average_pulse_file_name(root_dirname, psr, channel_number, polarization)
-        # np.savetxt(output_filename, average_pulse_profile)
-        # print("average pulse profile saved in file: ", output_filename)
+        # save data
+        time_series_filename = utils.get_time_series_filename(channel_number, root_dirname, polarization, psr)
+
+        np.savetxt(time_series_filename, np.array((global_time_series, intensities)).T)
+        print("time series data saved in file: ", time_series_filename)
         # return average_pulse_profile
 
 
@@ -257,7 +262,7 @@ def get_time_array(time_quanta_start, n_rows):
 
 def read_spec_file(n_rows, spec_file):
     dyn_spec = np.genfromtxt(islice(spec_file, n_rows), dtype=float)
-    print(f"spec file read. dyn_spec shape:{dyn_spec.shape}", end=" ")
+    print(f"spec file {spec_file.name[-7:-5]} read. ", end=" ")
     if dyn_spec.shape[0] < n_rows:
         print("eof for spec file reached")
         end_spec_file_flag = True
@@ -292,8 +297,10 @@ def de_disperse(dyn_spec, channel_to_column_delay, overflow_buffer, overflow_buf
         dedispersed[:, ch] = np.roll(dedispersed[:, ch], int(round(channel_to_column_delay[ch])))
 
     if overflow_buffer_flag:
-        dedispersed[:int(round(channel_to_column_delay[0])), :] = np.nanmean(
-            np.dstack((dedispersed[:int(round(channel_to_column_delay[0])), :], overflow_buffer)), axis=2)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            dedispersed[:int(round(channel_to_column_delay[0])), :] = np.nanmean(
+                np.dstack((dedispersed[:int(round(channel_to_column_delay[0])), :], overflow_buffer)), axis=2)
     return dedispersed[:dyn_spec.shape[0], :], dedispersed[dyn_spec.shape[0]:, :]
 
 

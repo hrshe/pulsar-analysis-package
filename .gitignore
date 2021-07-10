@@ -14,7 +14,7 @@ __pycache__/
 *.app
 *.avs
 *.mask
-
+*.ts
 # Distribution / packaging
 .idea
 .Python

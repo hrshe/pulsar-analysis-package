@@ -146,12 +146,16 @@ def get_robust_mean_rms(input_arr, sigma_threshold):
         iter_i += 1
         threshold = rms * sigma_threshold
 
-        mean = np.nanmean(arr)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            mean = np.nanmean(arr)
         rms0 = rms
 
         if iter_i > 1:
             arr = np.where(abs(arr - mean) <= threshold, arr, np.nan)
-        rms = np.nanstd(arr)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            rms = np.nanstd(arr)
 
         if iter_i > 1:
             if rms == 0.0:
@@ -181,3 +185,8 @@ def get_pulse_mask_filename(channel_number, root_dirname, polarization, psr):
 def get_average_spectrum_filename(channel_number, root_dirname, polarization, psr):
     return root_dirname + f"OutputData/{psr.psr_name_date_time}/DynamicSpectrum/ch0{str(channel_number)}/" + \
            f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".avs"
+
+
+def get_time_series_filename(channel_number, root_dirname, polarization, psr):
+    return root_dirname + f"OutputData/{psr.psr_name_date_time}/TimeSeries/ch0{str(channel_number)}/" + \
+           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".ts"

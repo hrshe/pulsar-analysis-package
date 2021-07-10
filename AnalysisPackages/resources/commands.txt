@@ -1,0 +1,4 @@
+python3 -m AnalysisPackages.spec.get_averagepulse B0834+06_20090725_114903 ch03 YY
+python3 -m AnalysisPackages.spec.get_pulsemask B0834+06_20090725_114903 ch03 XX
+python3 -m AnalysisPackages.spec.get_timeseries B0834+06_20090725_114903 ch03 XX 20
+python3 -m AnalysisPackages.timeseries.get_pulsestack B0834+06_20090725_114903 ch03 I 1000

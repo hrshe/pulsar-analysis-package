@@ -1,4 +1,5 @@
 import sys
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -44,6 +45,8 @@ def main(file_name, ch_number, polarization):
 
             # get time series in mili seconds
             time_array, time_quanta_start = get_time_array(time_quanta_start, dyn_spec.shape[0])
+            print(f"read till time quanta: {time_quanta_start} -> {round(time_array[-1], 2)} ms  --> "
+                  f"{round(time_array[-1] / psr.period, 2)} periods")
 
             # remove rfi
             dyn_spec = utils.remove_rfi(dyn_spec, psr)
@@ -51,7 +54,9 @@ def main(file_name, ch_number, polarization):
             # interpolate
             interpolated = interpolate_2D(dyn_spec, time_array, bins, psr)
 
-            average_pulse_profile = np.nanmean(np.dstack((average_pulse_profile, interpolated)), axis=2)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                average_pulse_profile = np.nanmean(np.dstack((average_pulse_profile, interpolated)), axis=2)
 
             continue_flag = True if (input("continue folding?").lower() == "y") else False
             if not continue_flag:
@@ -68,7 +73,7 @@ def main(file_name, ch_number, polarization):
 
 def interpolate_2D(dyn_spec, time_array, bins, psr):
     interpolated_intermediate, interpolated_count = create_zero_array(bins, dyn_spec.shape[1]), \
-                                                    create_zero_array(bins, dyn_spec.shape[1]),
+                                                    create_zero_array(bins, dyn_spec.shape[1])
     for i in range(time_array.shape[0]):
         f_p = (time_array[i] / psr.period) - int(time_array[i] / psr.period)
         n_bin = f_p * bins
@@ -90,7 +95,9 @@ def interpolate_2D(dyn_spec, time_array, bins, psr):
         #
         #     print("else condition of 0 <= j < bins - 1: j value is ", j)
 
-    return interpolated_intermediate / interpolated_count
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        return interpolated_intermediate / interpolated_count
 
 
 def create_zero_array(rows, cols):
@@ -112,7 +119,7 @@ def get_time_array(time_quanta_start, n_rows):
 
 def read_spec_file(end_spec_file_flag, n_rows, spec_file):
     dyn_spec = np.genfromtxt(islice(spec_file, n_rows), dtype=float)
-    print("spec file read. dyn_spec shape:", dyn_spec.shape)
+    print("\nspec file read.")
     if dyn_spec.shape[0] < n_rows:
         print("eof for spec file reached")
         end_spec_file_flag = True
