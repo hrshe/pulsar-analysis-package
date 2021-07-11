@@ -2,16 +2,15 @@
 Old code... not refactored
 todo : need to refactor this code
 """
+import argparse
 import warnings
 from pathlib import Path
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
 
 from AnalysisPackages.utilities import utils
 from AnalysisPackages.utilities.pulsar_information_utility import PulsarInformationUtility
-from AnalysisPackages.utilities.utils import time_delay_to_quanta
 
 
 def calculate_dispersion_delay(ch, ref_ch, psr, channel_number):
@@ -64,16 +63,17 @@ def main(file_name, ch_number, polarization):
         mask[ch, :] = temp
 
     utils.plot_DS(mask.T)
-    np.savetxt(utils.get_pulse_mask_filename(ch_number, root_dirname, polarization, psr), np.transpose(mask), fmt='%1.1f')
+    np.savetxt(utils.get_pulse_mask_filename(ch_number, root_dirname, polarization, psr), np.transpose(mask),
+               fmt='%1.1f')
 
-    masked_app = (app*mask).T
+    masked_app = (app * mask).T
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)
         average_spectrum = np.nanmean(masked_app, axis=0)
     plt.plot(average_spectrum)
     plt.show()
-    np.savetxt(utils.get_average_spectrum_filename(ch_number, root_dirname, polarization, psr), average_spectrum, fmt='%1.1f')
-
+    np.savetxt(utils.get_average_spectrum_filename(ch_number, root_dirname, polarization, psr), average_spectrum,
+               fmt='%1.1f')
 
     # print("Now Computing Spectrum Template")
     #
@@ -105,4 +105,12 @@ def get_avg_spectrum_template_filename(channel_number, root_dirname, polarizatio
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2], sys.argv[3])  # B0834+06_20090725_114903 ch03 XX
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input_file_name", type=str,
+                        help="The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)")
+    parser.add_argument("ch_number", type=str,
+                        help="band number (eg. ch03 for band 3)")
+    parser.add_argument("polarization", type=str,
+                        help="polarization for which average pulse profile is to be obtained ('XX' or 'YY')")
+    args = parser.parse_args()
+    main(args.input_file_name, args.ch_number, args.polarization)  # B0834+06_20090725_114903 ch03 XX

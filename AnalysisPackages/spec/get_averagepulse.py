@@ -1,4 +1,4 @@
-import sys
+import argparse
 import warnings
 from pathlib import Path
 
@@ -17,7 +17,7 @@ def ms_time_delay_to_time_quanta(t, psr):
     return t * ((psr.band[channel_number].sampling_frequency * 1000) / (512 * psr.n_packet_integration))
 
 
-def main(file_name, ch_number, polarization):
+def main(file_name, ch_number, polarization, specfile_chunk_size=5000):
     global channel_number
     global psr
 
@@ -25,7 +25,6 @@ def main(file_name, ch_number, polarization):
     channel_number = int(ch_number[2:4])
     bins = int(round(ms_time_delay_to_time_quanta(psr.period, psr)))
     average_pulse_profile = create_nan_array(bins, psr.n_channels)
-    specfile_chunk_size = 5000  # give proper name (this is chunk size)
     end_spec_file_flag = False
     root_dirname = str(Path(__file__).parent.parent.parent.absolute()) + '/'
     time_quanta_start = 0
@@ -128,4 +127,16 @@ def read_spec_file(end_spec_file_flag, n_rows, spec_file):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2], sys.argv[3])  # B0834+06_20090725_114903 ch03 XX
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input_file_name", type=str,
+                        help="The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)")
+    parser.add_argument("ch_number", type=str,
+                        help="band number (eg. ch03 for band 3)")
+    parser.add_argument("polarization", type=str,
+                        help="polarization for which average pulse profile is to be obtained ('XX' or 'YY')")
+    parser.add_argument("spec_chunk_size", type=int, default=5000, nargs="?",
+                        help="number of rows to be picked from .spec file at once (default value is 5000)")
+
+    args = parser.parse_args()
+    main(args.input_file_name, args.ch_number,
+         args.polarization, args.spec_chunk_size)  # B0834+06_20090725_114903 ch03 XX

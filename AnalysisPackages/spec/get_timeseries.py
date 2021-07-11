@@ -1,4 +1,4 @@
-import sys
+import argparse
 import warnings
 from pathlib import Path
 
@@ -16,14 +16,12 @@ from AnalysisPackages.utilities.pulsar_information_utility import PulsarInformat
 polarizations = ["XX", "YY"]
 
 
-def main(file_name, ch_number, polarization, pulse_width_spec):
+def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
+         decompression_method1=True, decompression_method2=True, plot_ds_ts_flag=False):
     global channel_number
     global psr
 
     polarization = polarization.upper()
-    decompression_method1 = True  # todo get from input
-    decompression_method2 = True  # todo get from input
-    chunk_rows = 5000  # todo get from input
 
     psr = PulsarInformationUtility(file_name)  # "B0834+06_20090725_114903"
     channel_number = int(ch_number[2:4])
@@ -85,7 +83,7 @@ def main(file_name, ch_number, polarization, pulse_width_spec):
                 intensities = np.append(intensities, np.nanmean(dedispersed, axis=1))
 
             # plot DS and corresponding TS
-            if False:
+            if plot_ds_ts_flag:
                 plot_DS_and_TS(dedispersed, intensities[-1 * chunk_rows:], dyn_spec.shape[0])
 
             overflow_buffer_flag = True
@@ -305,4 +303,28 @@ def de_disperse(dyn_spec, channel_to_column_delay, overflow_buffer, overflow_buf
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])  # B0834+06_20090725_114903 ch03 XX 20
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input_file_name", type=str,
+                        help="The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)")
+    parser.add_argument("ch_number", type=str,
+                        help="band number (eg. ch03 for band 3)")
+    parser.add_argument("polarization", type=str,
+                        help="polarization for which average pulse profile is to be obtained "
+                             "('XX', 'YY' or 'I' for stokes I)")
+    parser.add_argument("decomp_1_width", type=int, default=40, nargs="?",
+                        help="percentage of signals to be flagged around max signal for decompression by method 1. "
+                             "For details, refer documentation (default value is 40)")
+    parser.add_argument("-chunk", "--spec_chunk_size", type=int, default=5000, metavar="<int>",
+                        help="number of rows to be picked from .spec file at once (default value is 5000)")
+    parser.add_argument("-decomp1", "--decompression_method1", type=bool, default=True, metavar="<bool>",
+                        help="setting this to False can disable decompression by method 1 "
+                             "(usage: '-decomp1 False' default=True)")
+    parser.add_argument("-decomp2", "--decompression_method2", type=bool, default=True,  metavar="<bool>",
+                        help="setting this to False can disable decompression by method 2 "
+                             "(usage: '-decomp2 False' default=True)")
+    parser.add_argument("-plot", "--plot_ds_ts", type=bool, default=False,  metavar="<bool>",
+                        help="plot dynamic spectrum and corresponding time series after "
+                             "processing each chunk (usage: '-plot True' default=False)")
+    args = parser.parse_args()
+    main(args.input_file_name, args.ch_number, args.polarization, args.decomp_1_width, args.spec_chunk_size,
+         args.decompression_method1, args.decompression_method2, args.plot_ds_ts)  # B0834+06_20090725_114903 ch03 XX 20

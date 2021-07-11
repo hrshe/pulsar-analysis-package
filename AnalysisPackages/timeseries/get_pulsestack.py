@@ -1,4 +1,4 @@
-import sys
+import argparse
 from pathlib import Path
 
 import numpy as np
@@ -47,4 +47,17 @@ def main(file_name, ch_number, polarization, bins: int):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4])) # B0834+06_20090725_114903 ch03 XX 1000
+    parser = argparse.ArgumentParser()
+    parser.add_argument("file_name", type=str,
+                        help="The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)")
+    parser.add_argument("ch_number", type=str,
+                        help="band number (eg. ch03 for band 3)")
+    parser.add_argument("polarization", type=str,
+                        help="polarization for which average pulse profile is to be obtained "
+                             "('XX', 'YY' or 'I' for stokes I)")
+    parser.add_argument("-b", "--bins", type=int, default=1000, metavar="<int>",
+                        help="number of rows to be picked from .spec file at once (default value is 1000)")
+
+    args = parser.parse_args()
+    main(args.file_name, args.ch_number, args.polarization, args.bins) # B0834+06_20090725_114903 ch03 XX 1000
+    # main(file_name, ch_number, polarization, bins: int)
