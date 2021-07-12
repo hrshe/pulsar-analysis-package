@@ -210,7 +210,7 @@ In most cases, we will run:
 python3 -m AnalysisPackages.mbr.get_dynamicspectra ch03_B0834+06_20090725_114903
 ```
 
-For obtaining the dynamic spectrum with packet level synchronization across all bands we use teh following command. 
+For obtaining the dynamic spectrum with packet level synchronization across all bands we use the following command. 
 Apart from the synchronization mentioned in [Section 2](#2-packet-level-synchronization), this also includes 
 synchronization to compensate for dispersion delay across bands:
 ```

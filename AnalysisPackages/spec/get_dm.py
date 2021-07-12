@@ -39,14 +39,13 @@ def de_disperse(average_pulse, channel_to_frequency_array, dm, bins):
     return dedisperse_pulse
 
 
-def main(file_name, ch_number, polarization, bins):
+def main(file_name, ch_number, polarization):
     global channel_number
     global psr
 
     psr = PulsarInformationUtility(file_name)  # "B0834+06_20090725_114903"
     channel_number = int(ch_number[2:4])
     root_dirname = str(Path(__file__).parent.parent.parent.absolute()) + '/'
-    time_quanta = psr.period / bins  # in msilli sec
 
     average_pulse_file_path = utils.get_average_pulse_file_name(root_dirname, psr, channel_number, polarization)
 
@@ -55,6 +54,8 @@ def main(file_name, ch_number, polarization, bins):
         exit()
     print(f"reading file {average_pulse_file_path[112:]}")
     average_pulse = np.loadtxt(average_pulse_file_path)
+    bins = average_pulse.shape[0]
+
     # de disperse:
     channel_to_frequency_array = get_channel_frequency(psr, channel_number)
 
@@ -93,4 +94,4 @@ def main(file_name, ch_number, polarization, bins):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]))  # B0834+06_20090725_114903 ch03 XX 1000
+    main(sys.argv[1], sys.argv[2], sys.argv[3])  # B0834+06_20090725_114903 ch03 XX 1000

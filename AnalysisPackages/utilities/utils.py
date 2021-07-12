@@ -173,17 +173,17 @@ def get_spec_file_name(root_dirname, psr, channel_number, polarization):
 
 
 def get_average_pulse_file_name(root_dirname, psr, channel_number, polarization):
-    return root_dirname + f"OutputData/{psr.psr_name_date_time}/DynamicSpectrum/ch0{str(channel_number)}/" + \
+    return root_dirname + f"OutputData/{psr.psr_name_date_time}/AveragePulseProfile/ch0{str(channel_number)}/" + \
            f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".app"
 
 
 def get_pulse_mask_filename(channel_number, root_dirname, polarization, psr):
-    return root_dirname + f"OutputData/{psr.psr_name_date_time}/DynamicSpectrum/ch0{str(channel_number)}/" + \
+    return root_dirname + f"OutputData/{psr.psr_name_date_time}/AveragePulseProfile/ch0{str(channel_number)}/" + \
            f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".mask"
 
 
 def get_average_spectrum_filename(channel_number, root_dirname, polarization, psr):
-    return root_dirname + f"OutputData/{psr.psr_name_date_time}/DynamicSpectrum/ch0{str(channel_number)}/" + \
+    return root_dirname + f"OutputData/{psr.psr_name_date_time}/AveragePulseProfile/ch0{str(channel_number)}/" + \
            f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".avs"
 
 
