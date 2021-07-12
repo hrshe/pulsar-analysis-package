@@ -1,5 +1,3 @@
-
-
 1) python3 -m AnalysisPackages.spec.get_averagepulse B0834+06_20090725_114903 ch03 YY
 usage: get_averagepulse.py [-h] input_file_name ch_number polarization spec_chunk_size
 
