@@ -30,6 +30,12 @@ def main(file_name, ch_number, polarization, specfile_chunk_size=5000):
     time_quanta_start = 0
 
     spec_file_path = utils.get_spec_file_name(root_dirname, psr, channel_number, polarization)
+    print("spec file path: ", spec_file_path)
+    ok_flag = input("Okay? Continue?")
+
+    if ok_flag.lower() == 'n':
+        exit()
+
     if not isfile(spec_file_path):
         print(f"{bcolors.FAIL}file '{spec_file_path}' does not exist.\nExiting...{bcolors.ENDC}")
         exit()
@@ -122,6 +128,8 @@ def read_spec_file(end_spec_file_flag, n_rows, spec_file):
     if dyn_spec.shape[0] < n_rows:
         print("eof for spec file reached")
         end_spec_file_flag = True
+
+    dyn_spec[dyn_spec < 0] = np.nan
 
     return dyn_spec, end_spec_file_flag
 

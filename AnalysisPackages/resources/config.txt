@@ -1,6 +1,6 @@
 [pulsar-config]
-period = 1274.11
-dm = 12.88
+period = 1291.93
+dm = 4.3
 n_bands = 9
 
 [general-config]
@@ -11,7 +11,7 @@ n_parts = 16
 sigma_threshold = 3
 
 [folding-config]
-n_bins = 3000
+n_bins = 1000
 
 [channel-1-specific]
 central_frequency = 120.0

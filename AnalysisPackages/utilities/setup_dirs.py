@@ -8,6 +8,8 @@ def main(file_name):
     psr = PulsarInformationUtility(file_name)
     bands = int(psr.n_bands)
     current_dir = str(Path.cwd())
+    print("bands: ", bands)
+    print("current path: ", str(Path.cwd()))
     for band in range(bands):
         print("saving : "+ current_dir + f"/OutputData/{file_name}/DynamicSpectrum/ch0{str(band)}/")
         Path(current_dir + f"/OutputData/{file_name}/DynamicSpectrum/ch0{str(band)}/") \
