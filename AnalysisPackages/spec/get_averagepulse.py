@@ -132,7 +132,7 @@ def read_spec_file(end_spec_file_flag, n_rows, spec_file):
         print("eof for spec file reached")
         end_spec_file_flag = True
 
-    dyn_spec[dyn_spec < 0] = np.nan
+    dyn_spec[dyn_spec <= 0] = np.nan
 
     return dyn_spec, end_spec_file_flag
 
