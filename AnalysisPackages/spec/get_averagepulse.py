@@ -31,10 +31,10 @@ def main(file_name, ch_number, polarization, specfile_chunk_size=5000):
 
     spec_file_path = utils.get_spec_file_name(root_dirname, psr, channel_number, polarization)
     print("spec file path: ", spec_file_path)
-    ok_flag = input("Okay? Continue?")
-
-    if ok_flag.lower() == 'n':
-        exit()
+    # ok_flag = input("Okay? Continue?")
+    #
+    # if ok_flag.lower() == 'n':
+    #     exit()
 
     if not isfile(spec_file_path):
         print(f"{bcolors.FAIL}file '{spec_file_path}' does not exist.\nExiting...{bcolors.ENDC}")
@@ -63,17 +63,20 @@ def main(file_name, ch_number, polarization, specfile_chunk_size=5000):
                 warnings.simplefilter("ignore", category=RuntimeWarning)
                 average_pulse_profile = np.nanmean(np.dstack((average_pulse_profile, interpolated)), axis=2)
 
-            continue_flag = True if (input("continue folding?").lower() == "y") else False
+            #continue_flag = True if (input("continue folding?").lower() == "y") else False
+            continue_flag = True
+            if int(time_array[-1] / psr.period) > 100:
+                continue_flag = False
             if not continue_flag:
                 break
             if end_spec_file_flag:
                 break
 
-        utils.plot_DS(average_pulse_profile)
+        utils.plot_DS(average_pulse_profile, color="hot")
         output_filename = utils.get_average_pulse_file_name(root_dirname, psr, channel_number, polarization)
-        np.savetxt(output_filename, average_pulse_profile)
+        #np.savetxt(output_filename, average_pulse_profile)
         print("average pulse profile saved in file: ", output_filename)
-        # return average_pulse_profile
+        return average_pulse_profile
 
 
 def interpolate_2D(dyn_spec, time_array, bins, psr):
