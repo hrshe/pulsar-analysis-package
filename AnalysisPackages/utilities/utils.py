@@ -138,7 +138,7 @@ def get_robust_mean_rms_2d(arr, sigma_threshold):
     return mean, rms
 
 
-def get_robust_mean_rms_new(input_arr, sigma_threshold):
+def get_robust_mean_rms(input_arr, sigma_threshold):
     arr = np.copy(input_arr)
     ok = False
     iter_i, rms, mean = 0, 0.0, 0.0
