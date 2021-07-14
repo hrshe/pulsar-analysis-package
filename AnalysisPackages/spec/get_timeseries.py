@@ -59,7 +59,9 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
             # get time series in mili seconds and update next time quanta start
             dyn_spec_time_series = get_time_array(time_quanta_start, dyn_spec.shape[0])
             global_time_series = np.append(global_time_series, dyn_spec_time_series)
-            print(f"read till time quanta: {time_quanta_start} -> {round(dyn_spec_time_series[-1], 2)} ms")
+            #print(f"read till time quanta: {time_quanta_start} -> {round(dyn_spec_time_series[-1], 2)} ms")
+            print(f"read till time quanta: {time_quanta_start} -> {round(dyn_spec_time_series[-1], 2)} ms  --> "
+                  f"{round(dyn_spec_time_series[-1] / psr.period, 2)} periods")
             time_quanta_start = time_quanta_start + dyn_spec.shape[0]
 
             # remove rfi
@@ -83,6 +85,11 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
                 intensities = np.append(intensities, np.nanmean(dedispersed, axis=1))
 
             # plot DS and corresponding TS
+            continue_flag = True
+            if int(dyn_spec_time_series[-1] / psr.period) > 400:
+                continue_flag = False
+            if not continue_flag:
+                break
             if plot_ds_ts_flag:
                 plot_DS_and_TS(dedispersed, intensities[-1 * chunk_rows:], dyn_spec.shape[0])
 
