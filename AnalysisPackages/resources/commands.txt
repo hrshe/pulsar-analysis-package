@@ -49,7 +49,7 @@ optional arguments:
 
 
 
-4) python3 -m AnalysisPackages.timeseries.get_pulsestack B0834+06_20090725_114903 ch03 I 1000
+4) python3 -m AnalysisPackages.timeseries.get_pulsestack B0834+06_20090725_114903 ch03 I -b 1000
 usage: get_pulsestack.py [-h] [-b <int>] file_name ch_number polarization
 
 positional arguments:
