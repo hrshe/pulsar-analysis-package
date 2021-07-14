@@ -1,5 +1,5 @@
 [pulsar-config]
-period = 1292.2
+period = 1291.94
 dm = 4.3
 n_bands = 9
 
