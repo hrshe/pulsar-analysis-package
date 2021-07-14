@@ -65,7 +65,7 @@ def main(file_name, ch_number, polarization, specfile_chunk_size=5000):
 
             #continue_flag = True if (input("continue folding?").lower() == "y") else False
             continue_flag = True
-            if int(time_array[-1] / psr.period) > 100:
+            if int(time_array[-1] / psr.period) > 200:
                 continue_flag = False
             if not continue_flag:
                 break
