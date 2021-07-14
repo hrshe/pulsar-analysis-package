@@ -74,7 +74,7 @@ def main(file_name, ch_number, polarization, specfile_chunk_size=5000):
 
         utils.plot_DS(average_pulse_profile, color="hot")
         output_filename = utils.get_average_pulse_file_name(root_dirname, psr, channel_number, polarization)
-        #np.savetxt(output_filename, average_pulse_profile)
+        np.savetxt(output_filename, average_pulse_profile)
         print("average pulse profile saved in file: ", output_filename)
         return average_pulse_profile
 
