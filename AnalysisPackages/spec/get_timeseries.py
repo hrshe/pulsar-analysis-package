@@ -183,7 +183,9 @@ def decompress(flag_method1, flag_method2, dyn_spec, template_offpulse_spectrum,
             t = dyn_spec_time_series[index]
             flagged_spectrum, flagged_template_offpulse_spectrum = get_flagged_spectra_decompression_2(
                 spectrum, template_offpulse_spectrum, t, mask, psr)
-            correction_factor_2 = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                correction_factor_2 = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
         if correction_factor_2 != 1:
             dyn_spec[index] = spectrum / correction_factor_2
 

@@ -121,7 +121,9 @@ def remove_rfi(dynamic_spectrum, psr):
     snr = float(np.sqrt(psr.n_packet_integration))
     efficiency_x = mean / rms * snr
     mean_x, std_x = get_robust_mean_rms(efficiency_x[10:psr.n_channels - 10], psr.sigma_threshold)
-    dynamic_spectrum = np.where(abs(mean_x - efficiency_x) > psr.sigma_threshold * std_x, np.nan, dynamic_spectrum)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        dynamic_spectrum = np.where(abs(mean_x - efficiency_x) > psr.sigma_threshold * std_x, np.nan, dynamic_spectrum)
     return dynamic_spectrum
 
 
@@ -152,8 +154,9 @@ def get_robust_mean_rms(input_arr, sigma_threshold):
         rms0 = rms
 
         if iter_i > 1:
-            arr[np.isnan(arr)] = mean + 10 * threshold  # this is done to avoid runtime error while comparing nan
-            arr[abs(arr - mean) > threshold] = np.nan
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                arr[abs(arr - mean) > threshold] = np.nan
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
             rms = np.nanstd(arr)
