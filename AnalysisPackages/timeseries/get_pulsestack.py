@@ -39,11 +39,12 @@ def main(file_name, ch_number, polarization, bins: int):
 
     binned_time_series = np.divide(interpolated_intermediate, interpolated_count,
                                    out=np.zeros_like(interpolated_intermediate), where= interpolated_count!=0)
-    plt.plot(binned_time_series)
-    plt.show()
-
-    plt.imshow(binned_time_series.reshape(-1, bins))
-    plt.show()
+    #plt.plot(binned_time_series)
+    #plt.show()
+    np.savetxt(utils.get_binned_time_series_filename(), binned_time_series)
+    np.savetxt(utils.get_pulse_stack_filename(), binned_time_series.reshape(-1, bins))
+    #plt.imshow(binned_time_series.reshape(-1, bins))
+    #plt.show()
 
 
 if __name__ == '__main__':

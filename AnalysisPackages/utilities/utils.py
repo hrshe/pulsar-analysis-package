@@ -194,3 +194,13 @@ def get_average_spectrum_filename(channel_number, root_dirname, polarization, ps
 def get_time_series_filename(channel_number, root_dirname, polarization, psr):
     return root_dirname + f"OutputData/{psr.psr_name_date_time}/TimeSeries/ch0{str(channel_number)}/" + \
            f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".ts"
+
+
+def get_binned_time_series_filename(channel_number, root_dirname, polarization, psr):
+    return root_dirname + f"OutputData/{psr.psr_name_date_time}/TimeSeries/ch0{str(channel_number)}/" + \
+           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + "_binned.ts"
+
+
+def get_pulse_stack_filename(channel_number, root_dirname, polarization, psr):
+    return root_dirname + f"OutputData/{psr.psr_name_date_time}/TimeSeries/ch0{str(channel_number)}/" + \
+           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".pstack"
