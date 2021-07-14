@@ -152,6 +152,7 @@ def get_robust_mean_rms(input_arr, sigma_threshold):
         rms0 = rms
 
         if iter_i > 1:
+            arr[np.isnan(arr)] = mean + 10 * threshold  # this is done to avoid runtime error while comparing nan
             arr[abs(arr - mean) > threshold] = np.nan
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
