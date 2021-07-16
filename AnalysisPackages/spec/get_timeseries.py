@@ -107,8 +107,8 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
 
             overflow_buffer_flag = True
 
-        plt.plot(global_time_series, intensities)
-        plt.show()
+        # plt.plot(global_time_series, intensities)
+        # plt.show()
 
         # save data
         time_series_filename = utils.get_time_series_filename(channel_number, root_dirname, polarization, psr)
