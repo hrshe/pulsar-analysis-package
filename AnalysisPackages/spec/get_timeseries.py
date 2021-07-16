@@ -82,7 +82,10 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
             # freq integrate to find intensities and append to global array
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=RuntimeWarning)
-                intensities = np.append(intensities, np.nanmean(dedispersed, axis=1))
+                count_nonnan = np.sum(~np.isnan(dedispersed), axis=1)
+                count_filter_flag = count_nonnan > 30  # todo - name this well
+                integrated = np.nanmean(dedispersed, axis=1) * count_filter_flag
+                intensities = np.append(intensities, integrated)
 
             # plot DS and corresponding TS
             continue_flag = True
