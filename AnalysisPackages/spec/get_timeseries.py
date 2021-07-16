@@ -34,6 +34,7 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
     channel_to_frequency_array = get_channel_frequency()
     channel_to_time_delay_array = get_time_delay_array(channel_to_frequency_array)
     channel_to_column_delay = ms_time_delay_to_time_quanta(channel_to_time_delay_array, psr)
+    max_dispersion_delay = int(round(channel_to_column_delay[0]))
 
     spec_file_paths = get_spec_file_paths(channel_number, polarization, psr, root_dirname)
 
@@ -58,11 +59,16 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
 
             # get time series in mili seconds and update next time quanta start
             dyn_spec_time_series = get_time_array(time_quanta_start, dyn_spec.shape[0])
-            global_time_series = np.append(global_time_series, dyn_spec_time_series)
-            #print(f"read till time quanta: {time_quanta_start} -> {round(dyn_spec_time_series[-1], 2)} ms")
-            print(f"read till time quanta: {time_quanta_start} -> {round(dyn_spec_time_series[-1], 2)} ms  --> "
-                  f"{round(dyn_spec_time_series[-1] / psr.period, 2)} periods")
-            time_quanta_start = time_quanta_start + dyn_spec.shape[0]
+            if not overflow_buffer_flag:
+                global_time_series = np.append(global_time_series, dyn_spec_time_series[:-max_dispersion_delay])
+                print(f"read till time quanta: {time_quanta_start} -> {round(dyn_spec_time_series[-1], 2)} ms  --> "
+                      f"{round(dyn_spec_time_series[-1] / psr.period, 2)} periods")
+                time_quanta_start = time_quanta_start + dyn_spec.shape[0] - max_dispersion_delay
+            else:
+                global_time_series = np.append(global_time_series, dyn_spec_time_series)
+                print(f"read till time quanta: {time_quanta_start} -> {round(dyn_spec_time_series[-1], 2)} ms  --> "
+                      f"{round(dyn_spec_time_series[-1] / psr.period, 2)} periods")
+                time_quanta_start = time_quanta_start + dyn_spec.shape[0]
 
             # remove rfi
             dyn_spec = utils.remove_rfi(dyn_spec, psr)
@@ -94,7 +100,10 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
             if not continue_flag:
                 break
             if plot_ds_ts_flag:
-                plot_DS_and_TS(dedispersed, intensities[-1 * chunk_rows:], dyn_spec.shape[0])
+                if overflow_buffer_flag:
+                    plot_DS_and_TS(dedispersed, intensities[-1 * chunk_rows:], dyn_spec.shape[0])
+                else:
+                    plot_DS_and_TS(dedispersed, intensities[-1 * chunk_rows:], dyn_spec.shape[0] - max_dispersion_delay)
 
             overflow_buffer_flag = True
 
@@ -301,7 +310,8 @@ def ms_time_delay_to_time_quanta(t, psr):
 
 
 def de_disperse(dyn_spec, channel_to_column_delay, overflow_buffer, overflow_buffer_flag):
-    nan_array = create_nan_array(int(round(channel_to_column_delay[0])), psr.n_channels)
+    max_delay = int(round(channel_to_column_delay[0]))
+    nan_array = create_nan_array(max_delay, psr.n_channels)
     dedispersed = np.vstack((dyn_spec, nan_array))
     for ch in range(psr.n_channels):
         dedispersed[:, ch] = np.roll(dedispersed[:, ch], int(round(channel_to_column_delay[ch])))
@@ -309,8 +319,10 @@ def de_disperse(dyn_spec, channel_to_column_delay, overflow_buffer, overflow_buf
     if overflow_buffer_flag:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            dedispersed[:int(round(channel_to_column_delay[0])), :] = np.nanmean(
-                np.dstack((dedispersed[:int(round(channel_to_column_delay[0])), :], overflow_buffer)), axis=2)
+            dedispersed[:max_delay, :] = np.nanmean(np.dstack((dedispersed[:max_delay, :], overflow_buffer)), axis=2)
+    else:
+        print("buffer overflow is false")
+        return dedispersed[max_delay:dyn_spec.shape[0], :], dedispersed[dyn_spec.shape[0]:, :]
     return dedispersed[:dyn_spec.shape[0], :], dedispersed[dyn_spec.shape[0]:, :]
 
 
