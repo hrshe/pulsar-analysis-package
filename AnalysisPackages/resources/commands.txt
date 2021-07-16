@@ -1,4 +1,6 @@
 1) python3 -m AnalysisPackages.spec.get_averagepulse B0834+06_20090725_114903 ch03 YY
+> nohup python3 -u -W ignore -m AnalysisPackages.spec.get_averagepulse B0809+74 ch02 YY &> 02_YY_app.log &
+
 usage: get_averagepulse.py [-h] input_file_name ch_number polarization spec_chunk_size
 
 positional arguments:
@@ -61,3 +63,8 @@ optional arguments:
   -h, --help            show this help message and exit
   -b <int>, --bins <int>
                         number of rows to be picked from .spec file at once (default value is 1000)
+
+
+
+# Copy from ICARUS:
+scp desh@103.79.119.201:/home/desh/Desktop/Hrishi_July2021/pulsar-analysis-package/OutputData/B0809+74/AveragePulseProfile/ch03/ch03_B0809+74_XX.app ~/RRIProject/pulsar-analysis-package/OutputData/B0809+74/AveragePulseProfile/ch03
