@@ -310,8 +310,7 @@ def de_disperse(dyn_spec, channel_to_column_delay, overflow_buffer, overflow_buf
     if overflow_buffer_flag:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            dedispersed[:max_delay, :] = np.nanmean(
-                np.dstack((dedispersed[:max_delay, :], overflow_buffer)), axis=2)
+            dedispersed[:max_delay, :] = np.nanmean(np.dstack((dedispersed[:max_delay, :], overflow_buffer)), axis=2)
     else:
         print("buffer overflow is false")
         return dedispersed[max_delay:dyn_spec.shape[0], :], dedispersed[dyn_spec.shape[0]:, :]
