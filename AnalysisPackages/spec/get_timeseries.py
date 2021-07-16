@@ -80,7 +80,10 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
             # freq integrate to find intensities and append to global array
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=RuntimeWarning)
-                intensities = np.append(intensities, np.nanmean(dedispersed, axis=1))
+                count_nonnan = np.sum(~np.isnan(dedispersed), axis=1)
+                count_filter_flag = count_nonnan > 30  # todo - name this well
+                integrated = np.nanmean(dedispersed, axis=1) * count_filter_flag
+                intensities = np.append(intensities, integrated)
 
             # plot DS and corresponding TS
             if plot_ds_ts_flag:
@@ -319,10 +322,10 @@ if __name__ == '__main__':
     parser.add_argument("-decomp1", "--decompression_method1", type=bool, default=True, metavar="<bool>",
                         help="setting this to False can disable decompression by method 1 "
                              "(usage: '-decomp1 False' default=True)")
-    parser.add_argument("-decomp2", "--decompression_method2", type=bool, default=True,  metavar="<bool>",
+    parser.add_argument("-decomp2", "--decompression_method2", type=bool, default=True, metavar="<bool>",
                         help="setting this to False can disable decompression by method 2 "
                              "(usage: '-decomp2 False' default=True)")
-    parser.add_argument("-plot", "--plot_ds_ts", type=bool, default=False,  metavar="<bool>",
+    parser.add_argument("-plot", "--plot_ds_ts", type=bool, default=False, metavar="<bool>",
                         help="plot dynamic spectrum and corresponding time series after "
                              "processing each chunk (usage: '-plot True' default=False)")
     args = parser.parse_args()
