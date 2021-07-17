@@ -39,16 +39,27 @@ def main(file_name, ch_number, polarization, bins: int):
 
     binned_time_series = np.divide(interpolated_intermediate, interpolated_count,
                                    out=np.zeros_like(interpolated_intermediate), where= interpolated_count!=0)
-    #plt.plot(binned_time_series)
-    #plt.show()
     binned_time_series_filename = utils.get_binned_time_series_filename(channel_number, root_dirname, polarization, psr)
     pulse_stack_filename = utils.get_pulse_stack_filename(channel_number, root_dirname, polarization, psr)
     np.savetxt(binned_time_series_filename, binned_time_series)
     print(f"saved binned time series to: ", binned_time_series_filename)
     np.savetxt(pulse_stack_filename, binned_time_series.reshape(-1, bins))
     print(f"saved pulse stack to: ", pulse_stack_filename)
-    #plt.imshow(binned_time_series.reshape(-1, bins))
-    #plt.show()
+    integrated_filename = utils.get_integrated_pulse_stack_filename(channel_number, root_dirname, polarization, psr)
+    np.savetxt(integrated_filename, np.sum(binned_time_series.reshape(-1, bins), axis=0))
+    print(f"saved integrated pulse stack to: ", pulse_stack_filename)
+
+    # plt.plot(binned_time_series)
+    # plt.show()
+    # pulsestack = binned_time_series.reshape(-1, bins)
+    # plt.imshow(pulsestack.reshape(-1, bins), extent=[0, 1, 0, pulsestack.shape[0]], origin="lower", aspect=1/2000)
+    # plt.xlabel("Longitude")
+    # plt.ylabel("Period")
+    # plt.show()
+    # plt.plot(np.linspace(0, 0.999, 1000), np.sum(binned_time_series.reshape(-1, bins), axis=0))
+    # plt.xlim(0,1)
+    # plt.xlabel("Longitude")
+    # plt.show()
 
 
 if __name__ == '__main__':

@@ -204,3 +204,8 @@ def get_binned_time_series_filename(channel_number, root_dirname, polarization, 
 def get_pulse_stack_filename(channel_number, root_dirname, polarization, psr):
     return root_dirname + f"OutputData/{psr.psr_name_date_time}/TimeSeries/ch0{str(channel_number)}/" + \
            f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".pstack"
+
+
+def get_integrated_pulse_stack_filename(channel_number, root_dirname, polarization, psr):
+    return root_dirname + f"OutputData/{psr.psr_name_date_time}/TimeSeries/ch0{str(channel_number)}/" + \
+           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".integrated"
