@@ -13,7 +13,7 @@ optional arguments:
   -h, --help       show this help message and exit
 
 
-nohup python3 -u -m AnalysisPackages.spec.get_timeseries B0809+74 ch03 I 30 -chunk 5000 -decomp1 True &> ch03_YY_ts.log &
+nohup python3 -W ignore -u -m AnalysisPackages.spec.get_timeseries B0809+74 ch02 I 60 -chunk 5000 -decomp1 True &> ch02_I_TS.log &
 2) python3 -m AnalysisPackages.spec.get_pulsemask B0834+06_20090725_114903 ch03 XX
 usage: get_pulsemask.py [-h] input_file_name ch_number polarization
 
