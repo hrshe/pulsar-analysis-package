@@ -17,9 +17,14 @@ polarizations = ["XX", "YY"]
 
 
 def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
-         decompression_method1=True, decompression_method2=True, plot_ds_ts_flag=False):
+         decompression_method1=False, decompression_method2=False, plot_ds_ts_flag=False):
     global channel_number
     global psr
+
+    if decompression_method1:
+        print("decompressions by method 1 set to True")
+    if decompression_method2:
+        print("decompressions by method 2 set to True")
 
     polarization = polarization.upper()
 
@@ -60,7 +65,8 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
             # get time series in mili seconds and update next time quanta start
             dyn_spec_time_series = get_time_array(time_quanta_start, dyn_spec.shape[0])
 
-            print(f"read till time quanta: {time_quanta_start} -> {round(dyn_spec_time_series[-1], 2)} ms")
+            print(f"read till time quanta: {time_quanta_start} -> {round(dyn_spec_time_series[-1], 2)} ms  --> "
+                  f"{round(dyn_spec_time_series[-1] / psr.period, 2)} periods")
             time_quanta_start = time_quanta_start + dyn_spec.shape[0]
 
             # remove rfi
@@ -135,6 +141,9 @@ def get_dyn_spec(chunk_rows, end_spec_file_flag, gain_correction_factor, polariz
     elif polarization == 'I':
         dyn_spec, end_spec_file_flag = get_stokes_I(chunk_rows, spec_files,
                                                     gain_correction_factor)
+    else:
+        print(f"Unknown polarization: {polarization}... Exiting")
+        exit()
     return dyn_spec, end_spec_file_flag
 
 
@@ -180,16 +189,21 @@ def decompress(flag_method1, flag_method2, dyn_spec, template_offpulse_spectrum,
             flagged_spectrum, flagged_template_offpulse_spectrum = get_flagged_spectra_decompression_1(
                 spectrum, template_offpulse_spectrum, half_pulse_width_ch)
             correction_factor_1 = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
-        if correction_factor_1 != 1:
+        if not (np.isnan(correction_factor_1) or (correction_factor_1 == 0)):
             spectrum = spectrum / correction_factor_1
 
         # method 2
         if flag_method2:
             t = dyn_spec_time_series[index]
-            flagged_spectrum, flagged_template_offpulse_spectrum = get_flagged_spectra_decompression_2(
+            flagged_spectrum, flagged_template_offpulse_spectrum, nonnan_count = get_flagged_spectra_decompression_2(
                 spectrum, template_offpulse_spectrum, t, mask, psr)
-            correction_factor_2 = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
-        if correction_factor_2 != 1:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                if nonnan_count > 50:  # todo - name this better
+                    correction_factor_2 = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
+                else:
+                    correction_factor_2 = np.nan
+        if not (np.isnan(correction_factor_2) or (correction_factor_2 == 0)):
             dyn_spec[index] = spectrum / correction_factor_2
 
 
@@ -200,7 +214,7 @@ def get_flagged_spectra_decompression_2(spectrum, template_offpulse_spectrum, t,
         mask_index = mask_index - 1
     flagged_spectrum = flag_nan_from_mask(spectrum, mask[mask_index])
     flagged_template_offpulse_spectrum = flag_nan_from_mask(template_offpulse_spectrum, mask[mask_index])
-    return flagged_spectrum, flagged_template_offpulse_spectrum
+    return flagged_spectrum, flagged_template_offpulse_spectrum, np.sum(~np.isnan(flagged_spectrum))
 
 
 def get_flagged_spectra_decompression_1(spectrum, template_offpulse_spectrum, half_pulse_width_ch):
@@ -273,6 +287,7 @@ def read_spec_file(n_rows, spec_file):
     else:
         end_spec_file_flag = False
 
+    dyn_spec[dyn_spec <= 0] = np.nan
     return dyn_spec, end_spec_file_flag
 
 
@@ -325,12 +340,12 @@ if __name__ == '__main__':
                              "For details, refer documentation (default value is 40)")
     parser.add_argument("-chunk", "--spec_chunk_size", type=int, default=5000, metavar="<int>",
                         help="number of rows to be picked from .spec file at once (default value is 5000)")
-    parser.add_argument("-decomp1", "--decompression_method1", type=bool, default=True, metavar="<bool>",
+    parser.add_argument("-decomp1", "--decompression_method1", type=bool, default=False, metavar="<bool>",
                         help="setting this to False can disable decompression by method 1 "
-                             "(usage: '-decomp1 False' default=True)")
-    parser.add_argument("-decomp2", "--decompression_method2", type=bool, default=True, metavar="<bool>",
+                             "(usage: '-decomp1 False' default=False)")
+    parser.add_argument("-decomp2", "--decompression_method2", type=bool, default=False, metavar="<bool>",
                         help="setting this to False can disable decompression by method 2 "
-                             "(usage: '-decomp2 False' default=True)")
+                             "(usage: '-decomp2 False' default=False)")
     parser.add_argument("-plot", "--plot_ds_ts", type=bool, default=False, metavar="<bool>",
                         help="plot dynamic spectrum and corresponding time series after "
                              "processing each chunk (usage: '-plot True' default=False)")
