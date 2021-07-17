@@ -65,14 +65,14 @@ def main(file_name, ch_number, polarization, specfile_chunk_size=5000):
 
             #continue_flag = True if (input("continue folding?").lower() == "y") else False
             continue_flag = True
-            if int(time_array[-1] / psr.period) > 400:
+            if int(time_array[-1] / psr.period) > 1500:
                 continue_flag = False
             if not continue_flag:
                 break
             if end_spec_file_flag:
                 break
 
-        utils.plot_DS(average_pulse_profile, color="hot")
+        # utils.plot_DS(average_pulse_profile, color="hot")
         output_filename = utils.get_average_pulse_file_name(root_dirname, psr, channel_number, polarization)
         np.savetxt(output_filename, average_pulse_profile)
         print("average pulse profile saved in file: ", output_filename)

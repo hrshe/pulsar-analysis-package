@@ -344,10 +344,10 @@ if __name__ == '__main__':
     parser.add_argument("-decomp1", "--decompression_method1", type=bool, default=False, metavar="<bool>",
                         help="setting this to False can disable decompression by method 1 "
                              "(usage: '-decomp1 False' default=False)")
-    parser.add_argument("-decomp2", "--decompression_method2", type=bool, default=False,  metavar="<bool>",
+    parser.add_argument("-decomp2", "--decompression_method2", type=bool, default=False, metavar="<bool>",
                         help="setting this to False can disable decompression by method 2 "
                              "(usage: '-decomp2 False' default=False)")
-    parser.add_argument("-plot", "--plot_ds_ts", type=bool, default=False,  metavar="<bool>",
+    parser.add_argument("-plot", "--plot_ds_ts", type=bool, default=False, metavar="<bool>",
                         help="plot dynamic spectrum and corresponding time series after "
                              "processing each chunk (usage: '-plot True' default=False)")
     args = parser.parse_args()
