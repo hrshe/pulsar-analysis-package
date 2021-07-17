@@ -59,14 +59,9 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
 
             # get time series in mili seconds and update next time quanta start
             dyn_spec_time_series = get_time_array(time_quanta_start, dyn_spec.shape[0])
-            if not overflow_buffer_flag:
-                global_time_series = np.append(global_time_series, dyn_spec_time_series[:-max_dispersion_delay])
-                print(f"read till time quanta: {time_quanta_start} -> {round(dyn_spec_time_series[-1], 2)} ms")
-                time_quanta_start = time_quanta_start + dyn_spec.shape[0] - max_dispersion_delay
-            else:
-                global_time_series = np.append(global_time_series, dyn_spec_time_series)
-                print(f"read till time quanta: {time_quanta_start} -> {round(dyn_spec_time_series[-1], 2)} ms")
-                time_quanta_start = time_quanta_start + dyn_spec.shape[0]
+
+            print(f"read till time quanta: {time_quanta_start} -> {round(dyn_spec_time_series[-1], 2)} ms")
+            time_quanta_start = time_quanta_start + dyn_spec.shape[0]
 
             # remove rfi
             dyn_spec = utils.remove_rfi(dyn_spec, psr)
@@ -93,13 +88,11 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
 
             # plot DS and corresponding TS
             if plot_ds_ts_flag:
-                if overflow_buffer_flag:
-                    plot_DS_and_TS(dedispersed, intensities[-1 * chunk_rows:], dyn_spec.shape[0])
-                else:
-                    plot_DS_and_TS(dedispersed, intensities[-1 * chunk_rows:], dyn_spec.shape[0] - max_dispersion_delay)
+                plot_DS_and_TS(dedispersed, intensities[-1 * chunk_rows:])
 
             overflow_buffer_flag = True
 
+        global_time_series = get_time_array(0, intensities.shape[0])
         plt.plot(global_time_series, intensities)
         plt.show()
 
@@ -241,9 +234,10 @@ def subtract_robust_mean(dyn_spec, sigma_threshold):
         dyn_spec[:, ch] = dyn_spec[:, ch] - mean
 
 
-def plot_DS_and_TS(DS, intensities, n_rows):
+def plot_DS_and_TS(dyn_spec, intensities):
+    n_rows = dyn_spec.shape[0]
     figure, axis = plt.subplots(2, 1)
-    axis[0].imshow(np.transpose(DS), interpolation="nearest", aspect='auto', cmap="gray",
+    axis[0].imshow(np.transpose(dyn_spec), interpolation="nearest", aspect='auto', cmap="gray",
                    extent=[0, n_rows, 256, 0])
     axis[0].xaxis.set_label_position('top')
     axis[0].set_xlabel('Dynamic Spectrum')
