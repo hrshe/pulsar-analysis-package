@@ -94,11 +94,11 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
                 intensities = np.append(intensities, integrated)
 
             # plot DS and corresponding TS
-            continue_flag = True
-            if int(dyn_spec_time_series[-1] / psr.period) > 400:
-                continue_flag = False
-            if not continue_flag:
-                break
+            # continue_flag = True
+            # if int(dyn_spec_time_series[-1] / psr.period) > 400:
+            #     continue_flag = False
+            # if not continue_flag:
+            #     break
             if plot_ds_ts_flag:
                 if overflow_buffer_flag:
                     plot_DS_and_TS(dedispersed, intensities[-1 * chunk_rows:], dyn_spec.shape[0])
