@@ -28,6 +28,8 @@ optional arguments:
 
 
 3) python3 -m AnalysisPackages.spec.get_timeseries B0834+06_20090725_114903 ch03 XX 20
+> nohup python3 -W ignore -u -m AnalysisPackages.spec.get_timeseries B0809+74 ch02 I 60 -chunk 5000 -decomp1 True -decomp2 True  &> logs/ch02_I_TS.log &
+
 # B0834+06_20090725_114903 ch03 XX 20 -chunk 5000
 usage: get_timeseries.py [-h] [-chunk <int>] [-decomp1 <bool>] [-decomp2 <bool>] [-plot <bool>] input_file_name ch_number polarization [decomp_1_width]
 
