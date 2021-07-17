@@ -194,7 +194,7 @@ def decompress(flag_method1, flag_method2, dyn_spec, template_offpulse_spectrum,
             flagged_spectrum, flagged_template_offpulse_spectrum = get_flagged_spectra_decompression_1(
                 spectrum, template_offpulse_spectrum, half_pulse_width_ch)
             correction_factor_1 = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
-        if correction_factor_1 != 1:
+        if (not np.isnan(correction_factor_1)) or (correction_factor_1 == 0):
             spectrum = spectrum / correction_factor_1
 
         # method 2
@@ -205,7 +205,7 @@ def decompress(flag_method1, flag_method2, dyn_spec, template_offpulse_spectrum,
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=RuntimeWarning)
                 correction_factor_2 = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
-        if correction_factor_2 != 1:
+        if (not np.isnan(correction_factor_2)) or (correction_factor_2 == 0):
             dyn_spec[index] = spectrum / correction_factor_2
 
 
@@ -261,7 +261,7 @@ def plot_DS_and_TS(DS, intensities, n_rows):
     axis[1].plot(np.linspace(0, n_rows - 1, n_rows), intensities)
     axis[1].xaxis.set_label_position('bottom')
     axis[1].set_xlabel("Frequency Integrated")
-    axis[1].axis(xmin=0, xmax=n_rows, ymax=19, ymin=-5)
+    axis[1].axis(xmin=0, xmax=n_rows)
     plt.show()
 
 
@@ -288,6 +288,7 @@ def read_spec_file(n_rows, spec_file):
     else:
         end_spec_file_flag = False
 
+    dyn_spec[dyn_spec <= 0] = np.nan
     return dyn_spec, end_spec_file_flag
 
 
@@ -340,12 +341,12 @@ if __name__ == '__main__':
                              "For details, refer documentation (default value is 40)")
     parser.add_argument("-chunk", "--spec_chunk_size", type=int, default=5000, metavar="<int>",
                         help="number of rows to be picked from .spec file at once (default value is 5000)")
-    parser.add_argument("-decomp1", "--decompression_method1", type=bool, default=True, metavar="<bool>",
+    parser.add_argument("-decomp1", "--decompression_method1", type=bool, default=False, metavar="<bool>",
                         help="setting this to False can disable decompression by method 1 "
-                             "(usage: '-decomp1 False' default=True)")
-    parser.add_argument("-decomp2", "--decompression_method2", type=bool, default=True,  metavar="<bool>",
+                             "(usage: '-decomp1 False' default=False)")
+    parser.add_argument("-decomp2", "--decompression_method2", type=bool, default=False,  metavar="<bool>",
                         help="setting this to False can disable decompression by method 2 "
-                             "(usage: '-decomp2 False' default=True)")
+                             "(usage: '-decomp2 False' default=False)")
     parser.add_argument("-plot", "--plot_ds_ts", type=bool, default=False,  metavar="<bool>",
                         help="plot dynamic spectrum and corresponding time series after "
                              "processing each chunk (usage: '-plot True' default=False)")
