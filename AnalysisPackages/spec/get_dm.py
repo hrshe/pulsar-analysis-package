@@ -74,16 +74,17 @@ def main(file_name, ch_number, polarization):
 
         if False:
             figure, axis = plt.subplots(2, 1)
+            n_rows = dedisperse_pulse.shape[0]
             axis[0].imshow(np.transpose(dedisperse_pulse), interpolation="nearest", aspect='auto', cmap="gray",
                            extent=[0, 1, 256, 0])
             axis[0].xaxis.set_label_position('top')
             axis[0].set_xlabel('Folded Pulse Profile')
             axis[0].set_ylabel('Freq Channel')
             # axis[0].
-            axis[1].plot(np.linspace(0, 1, 1000), integrated)
+            axis[1].plot(np.linspace(0, 1, n_rows), integrated)
             axis[1].xaxis.set_label_position('bottom')
             axis[1].set_xlabel("Frequency Integrated")
-            axis[1].axis(xmin=0, xmax=1, ymax=36.7, ymin=29.9)
+            #axis[1].axis(xmin=0, xmax=1, ymax=36.7, ymin=29.9)
             axis[1].text(0.9, 0.5, "DM = " + str(round(dm_linspace[i], 2)), horizontalalignment='center',
                          verticalalignment='center',
                          transform=axis[1].transAxes)
