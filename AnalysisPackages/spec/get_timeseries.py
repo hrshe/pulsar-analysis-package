@@ -62,6 +62,10 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
             dyn_spec, end_spec_file_flag = get_dyn_spec(chunk_rows, end_spec_file_flag, gain_correction_factor,
                                                         polarization, spec_files)
 
+            if dyn_spec.shape[0] == 0:
+                print("dynamic spectrum chunk read is empty... Exiting")
+                break
+
             # get time series in mili seconds and update next time quanta start
             dyn_spec_time_series = get_time_array(time_quanta_start, dyn_spec.shape[0])
 
@@ -133,7 +137,8 @@ def get_stokes_I(chunk_rows, spec_files, gain_correction_factor):
     dyn_spec_x, end_spec_file_flag_x = read_spec_file(chunk_rows, spec_files[0])
     dyn_spec_y, end_spec_file_flag_y = read_spec_file(chunk_rows, spec_files[1])
 
-    dyn_spec_x = dyn_spec_x * gain_correction_factor
+    if dyn_spec_x.shape[0] != 0:
+        dyn_spec_x = dyn_spec_x * gain_correction_factor
 
     return dyn_spec_x + dyn_spec_y, end_spec_file_flag_x and end_spec_file_flag_y
 
@@ -188,46 +193,56 @@ def decompress(flag_method1, flag_method2, dyn_spec, template_offpulse_spectrum,
     for index, spectrum in enumerate(dyn_spec):
         if np.isnan(spectrum).all():  # skip missing packets spectrum
             continue
-        correction_factor_1, correction_factor_2 = 1, 1
+        correction_factor = 1
+        flagged_spectrum, flagged_template_offpulse_spectrum = spectrum, template_offpulse_spectrum,
+
         # method 1
         if flag_method1:
             flagged_spectrum, flagged_template_offpulse_spectrum = get_flagged_spectra_decompression_1(
-                spectrum, template_offpulse_spectrum, half_pulse_width_ch)
-            correction_factor_1 = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
-        if not (np.isnan(correction_factor_1) or (correction_factor_1 == 0)):
-            spectrum = spectrum / correction_factor_1
+                flagged_spectrum, template_offpulse_spectrum, half_pulse_width_ch)
 
         # method 2
         if flag_method2:
             t = dyn_spec_time_series[index]
-            flagged_spectrum, flagged_template_offpulse_spectrum, nonnan_count = get_flagged_spectra_decompression_2(
-                spectrum, template_offpulse_spectrum, t, mask, psr)
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", category=RuntimeWarning)
-                if nonnan_count > 50:  # todo - name this better
-                    correction_factor_2 = np.nansum(flagged_spectrum) / np.nansum(flagged_template_offpulse_spectrum)
-                else:
-                    correction_factor_2 = np.nan
-        if not (np.isnan(correction_factor_2) or (correction_factor_2 == 0)):
-            dyn_spec[index] = spectrum / correction_factor_2
+            flagged_spectrum, flagged_template_offpulse_spectrum = get_flagged_spectra_decompression_2(
+                flagged_spectrum, flagged_template_offpulse_spectrum, t, mask, psr)
+
+        offpulse_sum = np.nansum(flagged_template_offpulse_spectrum)
+        if offpulse_sum:
+            correction_factor = np.nansum(flagged_spectrum) / offpulse_sum
+
+        if np.isnan(correction_factor) or (correction_factor == 0):
+            correction_factor = 1
+
+        dyn_spec[index] = spectrum / correction_factor
 
 
 def get_flagged_spectra_decompression_2(spectrum, template_offpulse_spectrum, t, mask, psr):
     fractional_ms_time_in_a_period = t - int(t / psr.period) * psr.period
     mask_index = int(round(ms_time_delay_to_time_quanta(fractional_ms_time_in_a_period, psr)))
-    if mask_index >= mask.shape[0]:
-        mask_index = mask_index - 1
+    if mask_index == mask.shape[0]:
+        mask_index = 0
+
+    if np.isnan(mask[mask_index]).all():
+        return spectrum, template_offpulse_spectrum
+
     flagged_spectrum = flag_nan_from_mask(spectrum, mask[mask_index])
+    if np.isnan(flagged_spectrum).all():
+        return spectrum, template_offpulse_spectrum
+
     flagged_template_offpulse_spectrum = flag_nan_from_mask(template_offpulse_spectrum, mask[mask_index])
-    return flagged_spectrum, flagged_template_offpulse_spectrum, np.sum(~np.isnan(flagged_spectrum))
+    return flagged_spectrum, flagged_template_offpulse_spectrum
 
 
 def get_flagged_spectra_decompression_1(spectrum, template_offpulse_spectrum, half_pulse_width_ch):
-    index_of_max = np.nanargmax(spectrum)
-    flagged_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max, spectrum)
-    flagged_template_offpulse_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max,
-                                                             template_offpulse_spectrum)
-    return flagged_spectrum, flagged_template_offpulse_spectrum
+    if not np.isnan(spectrum).all():
+        index_of_max = np.nanargmax(spectrum)
+        flagged_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max, spectrum)
+        flagged_template_offpulse_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max, # todo - handle np.isnan(flagged_spectrum).all()
+                                                                 template_offpulse_spectrum)
+        return flagged_spectrum, flagged_template_offpulse_spectrum
+    else:
+        return spectrum, template_offpulse_spectrum
 
 
 def flag_nan_near_index(half_width, index_of_max, spectrum):
