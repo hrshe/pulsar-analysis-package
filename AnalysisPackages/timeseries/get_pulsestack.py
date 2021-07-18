@@ -58,6 +58,8 @@ def main(file_name, ch_number, polarization, bins: int):
     # plt.show()
     # plt.plot(np.linspace(0, 0.999, 1000), np.sum(binned_time_series.reshape(-1, bins), axis=0))
     # plt.xlim(0,1)
+    # plt.ylim(-32, 130)
+    # plt.title("Decompression By Both Methods - B0809+74 Band 01")
     # plt.xlabel("Longitude")
     # plt.show()
 
