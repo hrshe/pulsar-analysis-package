@@ -1,6 +1,7 @@
 import argparse
 import warnings
 from pathlib import Path
+import matplotlib.pyplot as plt
 
 import numpy as np
 
@@ -24,17 +25,14 @@ def main(file_name, ch_number, polarization, specfile_chunk_size=5000):
     psr = PulsarInformationUtility(file_name)  # "B0834+06_20090725_114903"
     channel_number = int(ch_number[2:4])
     bins = int(round(ms_time_delay_to_time_quanta(psr.period, psr)))
-    average_pulse_profile = create_nan_array(bins, psr.n_channels)
+    sum_pulse_profile = create_nan_array(bins, psr.n_channels)
+    counts_array = np.zeros(sum_pulse_profile.shape)
     end_spec_file_flag = False
     root_dirname = str(Path(__file__).parent.parent.parent.absolute()) + '/'
     time_quanta_start = 0
 
     spec_file_path = utils.get_spec_file_name(root_dirname, psr, channel_number, polarization)
     print("spec file path: ", spec_file_path)
-    # ok_flag = input("Okay? Continue?")
-    #
-    # if ok_flag.lower() == 'n':
-    #     exit()
 
     if not isfile(spec_file_path):
         print(f"{bcolors.FAIL}file '{spec_file_path}' does not exist.\nExiting...{bcolors.ENDC}")
@@ -42,7 +40,6 @@ def main(file_name, ch_number, polarization, specfile_chunk_size=5000):
     print(f"reading file {spec_file_path[112:]}")
 
     # read
-
     with open(spec_file_path, 'r') as spec_file:
         while not end_spec_file_flag:
             # read file
@@ -59,11 +56,12 @@ def main(file_name, ch_number, polarization, specfile_chunk_size=5000):
             # interpolate
             interpolated = interpolate_2D(dyn_spec, time_array, bins, psr)
 
+            counts_array = counts_array + (~np.isnan(interpolated)).astype(int)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=RuntimeWarning)
-                average_pulse_profile = np.nanmean(np.dstack((average_pulse_profile, interpolated)), axis=2)
+                sum_pulse_profile = np.nansum(np.dstack((sum_pulse_profile, interpolated)), axis=2)
+            sum_pulse_profile[sum_pulse_profile == 0] = np.nan
 
-            #continue_flag = True if (input("continue folding?").lower() == "y") else False
             continue_flag = True
             if int(time_array[-1] / psr.period) > 400:
                 continue_flag = False
@@ -73,10 +71,11 @@ def main(file_name, ch_number, polarization, specfile_chunk_size=5000):
                 break
 
         # utils.plot_DS(average_pulse_profile, color="hot")
+        average_pulse_profile = sum_pulse_profile / counts_array
         output_filename = utils.get_average_pulse_file_name(root_dirname, psr, channel_number, polarization)
         np.savetxt(output_filename, average_pulse_profile)
         print("average pulse profile saved in file: ", output_filename)
-        return average_pulse_profile
+        #return average_pulse_profile
 
 
 def interpolate_2D(dyn_spec, time_array, bins, psr):

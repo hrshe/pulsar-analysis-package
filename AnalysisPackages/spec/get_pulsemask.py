@@ -31,7 +31,17 @@ def main(file_name, ch_number, polarization):
 
     plt.figure("average pulse profile " + psr_name + " " + str(ch_number) + " " + polarization)
     app = np.loadtxt(utils.get_average_pulse_file_name(root_dirname, psr, ch_number, polarization)).T
+    mean_subtracted = (app.T - utils.get_robust_mean_rms_2d(app.T, psr.sigma_threshold)[0]).T
+    # app[88:91, :], mean_subtracted[88:91, :] = np.nan, np.nan
+    # app[111:115, :], mean_subtracted[111:115, :] = np.nan, np.nan
+    # app[125:140, :], mean_subtracted[125:140, :] = np.nan, np.nan
+
+    plt.figure("average pulse profile " + psr_name + " " + str(ch_number) + " " + polarization)
     utils.plot_DS(app.T)
+
+    plt.figure("mean subtracted average pulse profile " + psr_name + " " + str(ch_number) + " " + polarization)
+    utils.plot_DS(mean_subtracted.T)
+
     cent_freq = psr.get_central_frequency(ch_number)
     n_col = int(round(utils.ms_time_delay_to_time_quanta(psr.period, ch_number, psr)))
 
