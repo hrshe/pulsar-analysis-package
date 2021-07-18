@@ -13,6 +13,8 @@ from AnalysisPackages.utilities import utils
 from AnalysisPackages.utilities.pulsar_information_utility import PulsarInformationUtility
 
 
+# todo - fix the bandwidth of mask due to dispersion
+
 def calculate_dispersion_delay(ch, ref_ch, psr, channel_number):
     central_frequency = psr.band[channel_number].central_frequency
     band_width = psr.band[channel_number].sampling_frequency / 2
@@ -32,9 +34,6 @@ def main(file_name, ch_number, polarization):
     plt.figure("average pulse profile " + psr_name + " " + str(ch_number) + " " + polarization)
     app = np.loadtxt(utils.get_average_pulse_file_name(root_dirname, psr, ch_number, polarization)).T
     mean_subtracted = (app.T - utils.get_robust_mean_rms_2d(app.T, psr.sigma_threshold)[0]).T
-    # app[88:91, :], mean_subtracted[88:91, :] = np.nan, np.nan
-    # app[111:115, :], mean_subtracted[111:115, :] = np.nan, np.nan
-    # app[125:140, :], mean_subtracted[125:140, :] = np.nan, np.nan
 
     plt.figure("average pulse profile " + psr_name + " " + str(ch_number) + " " + polarization)
     utils.plot_DS(app.T)
@@ -45,7 +44,7 @@ def main(file_name, ch_number, polarization):
     cent_freq = psr.get_central_frequency(ch_number)
     n_col = int(round(utils.ms_time_delay_to_time_quanta(psr.period, ch_number, psr)))
 
-    ref_ch = int(input("Referance channel (Refer Figure): "))  # where center of pulse is seen
+    ref_ch = int(input("Reference channel (Refer Figure): "))  # where center of pulse is seen
     pulse_start_bin = int(input("Pulse start col number (Refer Figure): "))
     pulse_end_bin = int(input("Pulse end col number (Refer Figure): "))  # where center of pulse is seen
 
@@ -124,3 +123,33 @@ if __name__ == '__main__':
                         help="polarization for which average pulse profile is to be obtained ('XX' or 'YY')")
     args = parser.parse_args()
     main(args.input_file_name, args.ch_number, args.polarization)  # B0834+06_20090725_114903 ch03 XX
+
+# ch04 XX
+# 32:37   ,   102:109   ,   194:200
+# ch04 YY
+# 11:14   ,   102:109   ,   194:200
+
+# ch01 XX
+# 39:44   ,   51:57   ,   59:70   ,   76:87   ,   89:94   ,   13:17   ,   157:166   ,   149:153   ,   120:130
+#     app[39:44, :], mean_subtracted[39:44, :] = np.nan, np.nan
+#     app[51:57, :], mean_subtracted[51:57, :] = np.nan, np.nan
+#     app[59:70, :], mean_subtracted[59:70, :] = np.nan, np.nan
+#     app[76:87, :], mean_subtracted[76:87, :] = np.nan, np.nan
+#     app[89:94, :], mean_subtracted[89:94, :] = np.nan, np.nan
+#     app[13:17, :], mean_subtracted[13:17, :] = np.nan, np.nan
+#     app[157:166, :], mean_subtracted[157:166, :] = np.nan, np.nan
+#     app[149:153, :], mean_subtracted[149:153, :] = np.nan, np.nan
+#     app[120:130, :], mean_subtracted[120:130, :] = np.nan, np.nan
+# ch01 YY
+# 39:50   ,   51:57   ,   59:70   ,   73:75   ,   76:85   ,   13:19   ,   149:153   ,   120:130   ,   160:165   ,   167:172
+#     app[39:50, :], mean_subtracted[39:50, :] = np.nan, np.nan
+#     app[51:57, :], mean_subtracted[51:57, :] = np.nan, np.nan
+#     app[59:70, :], mean_subtracted[59:70, :] = np.nan, np.nan
+#     app[73:75, :], mean_subtracted[73:75, :] = np.nan, np.nan
+#     app[76:85, :], mean_subtracted[76:85, :] = np.nan, np.nan
+#     app[13:19, :], mean_subtracted[13:19, :] = np.nan, np.nan
+#     app[149:153, :], mean_subtracted[149:153, :] = np.nan, np.nan
+#     app[120:130, :], mean_subtracted[120:130, :] = np.nan, np.nan
+#     app[160:165, :], mean_subtracted[160:165, :] = np.nan, np.nan
+#     app[167:172, :], mean_subtracted[167:172, :] = np.nan, np.nan
+#     app[89:95, :], mean_subtracted[89:95, :] = np.nan, np.nan
