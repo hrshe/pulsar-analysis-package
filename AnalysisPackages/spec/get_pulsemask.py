@@ -126,8 +126,15 @@ if __name__ == '__main__':
 
 # ch04 XX
 # 32:37   ,   102:109   ,   194:200
+# app[32: 37, :], mean_subtracted[32: 37, :] = np.nan, np.nan
+# app[102: 109, :], mean_subtracted[102: 109, :] = np.nan, np.nan
+# app[194: 200, :], mean_subtracted[194: 200, :] = np.nan, np.nan
+
 # ch04 YY
 # 11:14   ,   102:109   ,   194:200
+# app[11: 14, :], mean_subtracted[11: 14, :] = np.nan, np.nan
+# app[102: 109, :], mean_subtracted[102: 109, :] = np.nan, np.nan
+# app[194: 200, :], mean_subtracted[194: 200, :] = np.nan, np.nan
 
 # ch01 XX
 # 39:44   ,   51:57   ,   59:70   ,   76:87   ,   89:94   ,   13:17   ,   157:166   ,   149:153   ,   120:130
