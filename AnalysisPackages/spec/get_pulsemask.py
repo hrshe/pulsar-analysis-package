@@ -34,9 +34,7 @@ def main(file_name, ch_number, polarization):
     plt.figure("average pulse profile " + psr_name + " " + str(ch_number) + " " + polarization)
     app = np.loadtxt(utils.get_average_pulse_file_name(root_dirname, psr, ch_number, polarization)).T
     mean_subtracted = (app.T - utils.get_robust_mean_rms_2d(app.T, psr.sigma_threshold)[0]).T
-    app[32: 37, :], mean_subtracted[32: 37, :] = np.nan, np.nan
-    app[102: 109, :], mean_subtracted[102: 109, :] = np.nan, np.nan
-    app[194: 200, :], mean_subtracted[194: 200, :] = np.nan, np.nan
+
     plt.figure("average pulse profile " + psr_name + " " + str(ch_number) + " " + polarization)
     utils.plot_DS(app.T)
 
