@@ -10,7 +10,7 @@ n_channels = 256
 n_parts = 16
 sigma_threshold = 3
 
-[folding-config]
+[pulsestack-folding-config]
 n_bins = 1000
 
 [channel-1-specific]
