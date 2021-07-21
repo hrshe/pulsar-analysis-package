@@ -74,8 +74,7 @@ if __name__ == '__main__':
                         help="polarization for which average pulse profile is to be obtained "
                              "('XX', 'YY' or 'I' for stokes I)")
     parser.add_argument("-b", "--bins", type=int, default=1000, metavar="<int>",
-                        help="number of rows to be picked from .spec file at once (default value is 1000)")
+                        help="number of bins in one period (default value is 1000)")
 
     args = parser.parse_args()
     main(args.file_name, args.ch_number, args.polarization, args.bins) # B0834+06_20090725_114903 ch03 XX 1000
-    # main(file_name, ch_number, polarization, bins: int)
