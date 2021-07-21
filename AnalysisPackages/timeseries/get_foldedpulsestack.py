@@ -108,7 +108,7 @@ def main(file_name, ch_number, polarization, p4: int, p1bins: int, p4bins: int,
 
 
 def plot_integrated_pulse_profile(ch_number, file_name, pulse_stack):
-    plt.plot(np.linspace(0, 0.999, 1000), np.sum(pulse_stack, axis=0))
+    plt.plot(np.linspace(0, 0.999, 1000), np.mean(pulse_stack, axis=0))
     plt.xlim(0, 1)
     # plt.ylim(-32, 130)
     plt.title(f"Integrated Pulse {file_name} Band {ch_number}")
