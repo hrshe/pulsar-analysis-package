@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import LassoSelector
 from matplotlib import path
 from matplotlib.widgets import Button
-
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from AnalysisPackages.utilities import utils
 
 app = np.loadtxt(
@@ -18,6 +18,7 @@ mean_subtracted_original = np.copy(mean_subtracted)
 fig, ax1 = plt.subplots()
 # plt.subplots_adjust(left=0.1, bottom=0.3)
 msk = plt.imshow(mean_subtracted, cmap="gray")
+
 # ax1 = fig.add_subplot(111)
 # ax1.set_title('lasso selection:')
 # msk = ax1.imshow(mean_subtracted, cmap="gray")
@@ -28,7 +29,9 @@ msk = plt.imshow(mean_subtracted, cmap="gray")
 # ax2 = fig.add_subplot(212)
 # ax2.set_title('numpy array:')
 # msk = ax2.imshow(array, vmax=1)
-# fig.colorbar(msk)
+divider = make_axes_locatable(ax1)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(msk, cax=cax)
 
 
 # Pixel coordinates
@@ -70,6 +73,7 @@ btnOk = Button(ax=axButtonOk, label="OK", hovercolor="green")
 btnOk.on_clicked(close_plot)
 btnReset.on_clicked(reset_plot)
 lasso = LassoSelector(ax1, onselect)
+
 plt.show()
 
 print("hello world")
@@ -78,5 +82,8 @@ mean_subtracted[mean_subtracted != -9999] = 1
 mean_subtracted[np.isnan(mean_subtracted)] = 1
 mean_subtracted[mean_subtracted == -9999] = np.nan
 # np.savetxt("ch04_B0809+74_YY.mask", mean_subtracted)
-plt.imshow(mean_subtracted)
+plt.imshow(mean_subtracted, extent=[0,1,256,0], aspect=1/600)
+plt.title("Mask Generated")
+plt.xlabel("Longitude")
+plt.ylabel("Frequency Channels")
 plt.show()
