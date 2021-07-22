@@ -95,6 +95,19 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
                 template_offpulse_spectrum = utils.get_robust_mean_rms_2d(dyn_spec, psr.sigma_threshold)[0]
                 decompress(decompression_method1, decompression_method2, dyn_spec, template_offpulse_spectrum,
                            dyn_spec_time_series, half_pulse_width_ch, pulse_mask, psr)
+            if channel_number == 1:
+                print("flagging majority channels for band 1")
+                dyn_spec[:, :17] = np.nan
+                dyn_spec[:, 108:] = np.nan
+                dyn_spec[:, 39:44] = np.nan
+                dyn_spec[:, 51:57] = np.nan
+                dyn_spec[:, 59:70] = np.nan
+                dyn_spec[:, 76:87] = np.nan
+                dyn_spec[:, 89:94] = np.nan
+                dyn_spec[13:17] = np.nan
+                dyn_spec[:, 157:166] = np.nan
+                dyn_spec[:, 149:153] = np.nan
+                dyn_spec[:, 120:130] = np.nan
 
             if True:
                 for index, spectrum in enumerate(dyn_spec):
