@@ -66,6 +66,20 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
                 print("dynamic spectrum chunk read is empty... Exiting")
                 break
 
+            if channel_number == 1:
+                print("flagging majority channels for band 1")
+                dyn_spec[:, :17] = np.nan
+                dyn_spec[:, 108:] = np.nan
+                dyn_spec[:, 39:44] = np.nan
+                dyn_spec[:, 51:57] = np.nan
+                dyn_spec[:, 59:70] = np.nan
+                dyn_spec[:, 76:87] = np.nan
+                dyn_spec[:, 89:94] = np.nan
+                dyn_spec[13:17] = np.nan
+                dyn_spec[:, 157:166] = np.nan
+                dyn_spec[:, 149:153] = np.nan
+                dyn_spec[:, 120:130] = np.nan
+
             # get time series in mili seconds and update next time quanta start
             dyn_spec_time_series = get_time_array(time_quanta_start, dyn_spec.shape[0])
 
@@ -82,6 +96,19 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
                 decompress(decompression_method1, decompression_method2, dyn_spec, template_offpulse_spectrum,
                            dyn_spec_time_series, half_pulse_width_ch, pulse_mask, psr)
 
+            if True:
+                for index, spectrum in enumerate(dyn_spec):
+                    if np.isnan(spectrum).all():  # skip missing packets spectrum
+                        continue
+                    t = dyn_spec_time_series[index]
+                    fractional_ms_time_in_a_period = t - int(t / psr.period) * psr.period
+                    mask_index = int(round(ms_time_delay_to_time_quanta(fractional_ms_time_in_a_period, psr)))
+                    if mask_index == pulse_mask.shape[0]:
+                        mask_index = 0
+                    invert_pulse_mask = np.array(np.isnan(pulse_mask), dtype="float")
+                    invert_pulse_mask[invert_pulse_mask == 0] = np.nan
+                    dyn_spec[index] = spectrum * invert_pulse_mask[mask_index]
+
             # de disperse and add buffer
             dedispersed, overflow_buffer = de_disperse(dyn_spec, channel_to_column_delay,
                                                        overflow_buffer, overflow_buffer_flag)
@@ -92,7 +119,7 @@ def main(file_name, ch_number, polarization, pulse_width_spec, chunk_rows=5000,
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=RuntimeWarning)
                 count_nonnan = np.sum(~np.isnan(dedispersed), axis=1)
-                count_filter_flag = count_nonnan > 30  # todo - name this well
+                count_filter_flag = count_nonnan > 10  # todo - name this well
                 integrated = np.nanmean(dedispersed, axis=1) * count_filter_flag
                 intensities = np.append(intensities, integrated)
 
@@ -190,7 +217,7 @@ def get_spec_file_paths(channel_number, polarization, psr, root_dirname):
 
 def decompress(flag_method1, flag_method2, dyn_spec, template_offpulse_spectrum, dyn_spec_time_series,
                half_pulse_width_ch, mask, psr):
-    for index, spectrum in enumerate(dyn_spec):
+    for index, spectrum in enumerate(dyn_spec):  # todo add if condiiton on or of both flags
         if np.isnan(spectrum).all():  # skip missing packets spectrum
             continue
         correction_factor = 1
@@ -238,7 +265,8 @@ def get_flagged_spectra_decompression_1(spectrum, template_offpulse_spectrum, ha
     if not np.isnan(spectrum).all():
         index_of_max = np.nanargmax(spectrum)
         flagged_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max, spectrum)
-        flagged_template_offpulse_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max, # todo - handle np.isnan(flagged_spectrum).all()
+        flagged_template_offpulse_spectrum = flag_nan_near_index(half_pulse_width_ch, index_of_max,
+                                                                 # todo - handle np.isnan(flagged_spectrum).all()
                                                                  template_offpulse_spectrum)
         return flagged_spectrum, flagged_template_offpulse_spectrum
     else:
