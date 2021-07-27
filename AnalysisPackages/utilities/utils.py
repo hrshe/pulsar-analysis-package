@@ -211,5 +211,10 @@ def get_integrated_pulse_stack_filename(channel_number, root_dirname, polarizati
            f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + '_' + polarization + ".integrated"
 
 
+def get_folded_pulse_stack_filename(channel_number, root_dirname, psr):
+    return root_dirname + f"OutputData/{psr.psr_name_date_time}/PulseStack/ch0{str(channel_number)}/" + \
+           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + "_folded.pstack"
+
+
 def get_pulse_stack_properties_filename(root_dirname):
     return root_dirname + f"AnalysisPackages/resources/pulse_stack_properties.txt"

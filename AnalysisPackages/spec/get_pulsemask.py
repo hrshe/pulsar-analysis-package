@@ -138,15 +138,15 @@ if __name__ == '__main__':
 
 # ch01 XX
 # 39:44   ,   51:57   ,   59:70   ,   76:87   ,   89:94   ,   13:17   ,   157:166   ,   149:153   ,   120:130
-#     app[39:44, :], mean_subtracted[39:44, :] = np.nan, np.nan
-#     app[51:57, :], mean_subtracted[51:57, :] = np.nan, np.nan
-#     app[59:70, :], mean_subtracted[59:70, :] = np.nan, np.nan
-#     app[76:87, :], mean_subtracted[76:87, :] = np.nan, np.nan
-#     app[89:94, :], mean_subtracted[89:94, :] = np.nan, np.nan
-#     app[13:17, :], mean_subtracted[13:17, :] = np.nan, np.nan
-#     app[157:166, :], mean_subtracted[157:166, :] = np.nan, np.nan
-#     app[149:153, :], mean_subtracted[149:153, :] = np.nan, np.nan
-#     app[120:130, :], mean_subtracted[120:130, :] = np.nan, np.nan
+# app[39:44, :], mean_subtracted[39:44, :] = np.nan, np.nan
+# app[51:57, :], mean_subtracted[51:57, :] = np.nan, np.nan
+# app[59:70, :], mean_subtracted[59:70, :] = np.nan, np.nan
+# app[76:87, :], mean_subtracted[76:87, :] = np.nan, np.nan
+# app[89:94, :], mean_subtracted[89:94, :] = np.nan, np.nan
+# app[13:17, :], mean_subtracted[13:17, :] = np.nan, np.nan
+# app[157:166, :], mean_subtracted[157:166, :] = np.nan, np.nan
+# app[149:153, :], mean_subtracted[149:153, :] = np.nan, np.nan
+# app[120:130, :], mean_subtracted[120:130, :] = np.nan, np.nan
 # ch01 YY
 # 39:50   ,   51:57   ,   59:70   ,   73:75   ,   76:85   ,   13:19   ,   149:153   ,   120:130   ,   160:165   ,   167:172
 #     app[39:50, :], mean_subtracted[39:50, :] = np.nan, np.nan
