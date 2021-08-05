@@ -21,6 +21,27 @@ def main(file_name, ch_number, polarization, p4: int, p1bins: int, p4bins: int):
 
     pulse_stack = binned_time_series.reshape(-1, p1bins)
 
+    std = np.nanstd(pulse_stack[:, 800:], axis=1)
+
+    # plt.figure()
+    # plt.title("std")
+    # plt.plot(std, np.arange(pulse_stack.shape[0]))
+    # plt.ylim(0, pulse_stack.shape[0])
+    # plt.show()
+
+    # std_cutoff = float(input("enter cutoff std value: "))
+    std_cutoff = {1: 4, 3: 1.6}.get(channel_number)
+    std_arr = std < std_cutoff
+
+    for i in range(pulse_stack.shape[0]):
+        pulse_stack[i] = pulse_stack[i] * std_arr[i]
+
+    # plt.imshow(pulse_stack.reshape(-1, p1bins), extent=[0, 1, 0, pulse_stack.shape[0]], origin="lower",
+    #            aspect="auto")
+    # plt.xlabel("Longitude")
+    # plt.ylabel("Period")
+    # plt.show()
+
     pulse_stack_properties_filename = utils.get_pulse_stack_properties_filename(root_dirname)
     pulse_stack_properties = np.loadtxt(pulse_stack_properties_filename)
     previous_properties_flag = False
@@ -30,49 +51,55 @@ def main(file_name, ch_number, polarization, p4: int, p1bins: int, p4bins: int):
               f"Input longitude where the pulse ends: {pulse_stack_properties[1]}\n"
               f"Input start period number : {pulse_stack_properties[2]}\n"
               f"Input end period number : {pulse_stack_properties[3]}")
-        previous_properties_flag = True if input("use same? (y/n): ").lower() == 'y' else False
+        # previous_properties_flag = True if input("use same? (y/n): ").lower() == 'y' else False
+        previous_properties_flag = True
 
     if not previous_properties_flag:
         plot_pulse_stack(pulse_stack)
         plot_integrated_pulse_profile(ch_number, file_name, pulse_stack)
-        longitude_start = int(float(input("Input longitude where the pulse starts: ")) * 1000)
-        longitude_end = int(float(input("Input longitude where the pulse ends: ")) * 1000)
+        longitude_start = int(float(input("Input longitude where the pulse starts: ")) * p1bins)
+        longitude_end = int(float(input("Input longitude where the pulse ends: ")) * p1bins)
         period_start = int(input("Input start period number : "))
         period_end = int(input("Input end period number : "))
-        np.savetxt(pulse_stack_properties_filename,
-                   np.array([longitude_start, longitude_end, period_start, period_end]))
+        # np.savetxt(pulse_stack_properties_filename,
+        # np.array([longitude_start/1000, longitude_end/1000, period_start, period_end]))
     else:
-        longitude_start = int(float(pulse_stack_properties[0])*1000)
-        longitude_end = int(float(pulse_stack_properties[1])*1000)
+        longitude_start = int(float(pulse_stack_properties[0]) * p1bins)
+        longitude_end = int(float(pulse_stack_properties[1]) * p1bins)
         period_start = int(pulse_stack_properties[2])
         period_end = int(pulse_stack_properties[3])
 
     pulse_stack = pulse_stack[period_start:period_end, longitude_start:longitude_end]
 
-    if False:  # seperate plot fun
-        plt.imshow(pulse_stack, extent=[longitude_start / 1000, longitude_end / 1000,
-                                        period_start, period_end], origin="lower", aspect="auto")
-        plt.xlabel("Longitude")
-        plt.ylabel("Period")
-        plt.show()
-    if False:  # seperate plot fun
-        plt.plot(np.linspace(longitude_start / 1000, longitude_end / 1000, longitude_end - longitude_start),
-                 np.mean(pulse_stack, axis=0))
-        plt.xlim(longitude_start / 1000, longitude_end / 1000)
-        # plt.ylim(-32, 130)
-        plt.title(f"Integrated Pulse {file_name} Band {ch_number}")
-        plt.xlabel("Longitude")
-        plt.show()
+    if channel_number == 1:
+        ch_1_period_flags = [27, 84, 56, 69, 111, 114, 123, 125, 128, 131, 170, 181, 195, 198, 221, 222, 219, 247, 273,
+                             279, 291, 316, 341, 342, 361, 383, 407, 416, 438, 459, 467, 469, 485, 488, 492, 493, 519,
+                             520, 527, 531, 560, 586, 588, 591, 596, 626, 636, 693, 703, 714, 733, 745, 774, 788]
+        pulse_stack[ch_1_period_flags] = 0
 
-    folding_parameter_list = np.linspace(81, 380, 3000)
+    folding_parameter_list = np.linspace(5, 25, 2001)
+
     sum_of_squares_list = np.zeros(folding_parameter_list.shape)
     for i in range(folding_parameter_list.shape[0]):
         folded_pulse_stack = get_foldedpulsestack.main(file_name, ch_number, polarization, folding_parameter_list[i],
                                                        p1bins, p4bins, pulse_stack)
         sum_of_squares_list[i] = np.nansum(np.square(folded_pulse_stack))
+        print(f"Done for {folding_parameter_list[i]}")
 
+    save = np.zeros((folding_parameter_list.shape[0], 2))
+    save[:, 0] = folding_parameter_list
+    save[:, 1] = sum_of_squares_list
+    #np.savetxt(f"~/RRIProject/desh_mail/FindP4/B0809+74_ch0{channel_number}_FindP4.dat", save)
     plt.plot(folding_parameter_list, sum_of_squares_list)
+    plt.xlim(3, 25)
+    plt.xlabel("P3 -->")
+    plt.title("Auto correlation to find P3")
+    max_argument = np.argmax(sum_of_squares_list)
+    plt.scatter(folding_parameter_list[max_argument],
+                sum_of_squares_list[max_argument], color="r", marker="x")
+    #plt.savefig(f"~/RRIProject/desh_mail/FindP4/B0809+74_ch0{channel_number}_FindP4.png")
     plt.show()
+    print("end")
 
 
 def plot_integrated_pulse_profile(ch_number, file_name, pulse_stack):
