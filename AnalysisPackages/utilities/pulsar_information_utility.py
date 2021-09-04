@@ -145,9 +145,6 @@ class BandSpecificConfig:
                   f"BandSpecific instance... {bcolors.ENDC}")
 
 
-
-
-
 class PulsarInformationUtility:
     def __init__(self, mbr_pulsar_name_date_time):
         self.root_dirname = str(Path(__file__).parent.parent.parent.absolute())
@@ -242,7 +239,7 @@ class PulsarInformationUtility:
         print("Skip packets for dispersion delay compensation:")
         for i in range(n_bands):
             time_delay[i] = time_delay_to_packet_delay(calculate_time_delay(dm, i + 1, ref_band),
-                                                       self.band[i+1].sampling_frequency)
+                                                       self.band[i + 1].sampling_frequency)
             print("ch:" + str(i + 1) + "	" + str(time_delay[i]))
 
         for i in range(1, n_bands + 1):

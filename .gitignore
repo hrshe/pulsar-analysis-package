@@ -11,7 +11,9 @@ __pycache__/
 *.spec
 *.dat
 *.prof
+*.app
 
+*.ts
 # Distribution / packaging
 .idea
 .Python

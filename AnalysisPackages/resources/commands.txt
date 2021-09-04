@@ -1,0 +1,74 @@
+1) python3 -m AnalysisPackages.spec.get_averagepulse B0834+06_20090725_114903 ch03 YY
+> nohup python3 -u -W ignore -m AnalysisPackages.spec.get_averagepulse B0809+74 ch02 YY &> 02_YY_app.log &
+
+usage: get_averagepulse.py [-h] input_file_name ch_number polarization spec_chunk_size
+
+positional arguments:
+  input_file_name  The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)
+  ch_number        band number (eg. ch03 for band 3)
+  polarization     polarization for which average pulse profile is to be obtained ('XX' or 'YY')
+  spec_chunk_size  number of rows to be picked from .spec file at once (default value is 5000)
+
+optional arguments:
+  -h, --help       show this help message and exit
+
+
+nohup python3 -W ignore -u -m AnalysisPackages.spec.get_timeseries B0809+74 ch02 I 60 -chunk 5000 -decomp1 True &> ch02_I_TS.log &
+2) python3 -m AnalysisPackages.spec.get_pulsemask B0834+06_20090725_114903 ch03 XX
+usage: get_pulsemask.py [-h] input_file_name ch_number polarization
+
+positional arguments:
+  input_file_name  The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)
+  ch_number        band number (eg. ch03 for band 3)
+  polarization     polarization for which average pulse profile is to be obtained ('XX' or 'YY')
+
+optional arguments:
+  -h, --help       show this help message and exit
+
+
+
+3) python3 -m AnalysisPackages.spec.get_timeseries B0834+06_20090725_114903 ch03 XX 20
+> nohup python3 -W ignore -u -m AnalysisPackages.spec.get_timeseries B0809+74 ch02 I 60 -chunk 5000 -decomp1 True -decomp2 True  &> logs/ch02_I_TS.log &
+
+# B0834+06_20090725_114903 ch03 XX 20 -chunk 5000
+usage: get_timeseries.py [-h] [-chunk <int>] [-decomp1 <bool>] [-decomp2 <bool>] [-plot <bool>] input_file_name ch_number polarization [decomp_1_width]
+
+positional arguments:
+  input_file_name       The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)
+  ch_number             band number (eg. ch03 for band 3)
+  polarization          polarization for which average pulse profile is to be obtained ('XX', 'YY' or 'I' for stokes I)
+  decomp_1_width        percentage of signals to be flagged around max signal for decompression by method 1. For details, refer documentation (default value is 40)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -chunk <int>, --spec_chunk_size <int>
+                        number of rows to be picked from .spec file at once (default value is 5000)
+  -decomp1 <bool>, --decompression_method1 <bool>
+                        setting this to False can disable decompression by method 1 (usage: '-decomp1 False' default=True)
+  -decomp2 <bool>, --decompression_method2 <bool>
+                        setting this to False can disable decompression by method 2 (usage: '-decomp2 False' default=True)
+  -plot <bool>, --plot_ds_ts <bool>
+                        plot dynamic spectrum and corresponding time series after processing each chunk (usage: '-plot True' default=False)
+
+
+
+
+4) python3 -m AnalysisPackages.timeseries.get_pulsestack B0834+06_20090725_114903 ch03 I -b 1000
+usage: get_pulsestack.py [-h] [-b <int>] file_name ch_number polarization
+
+positional arguments:
+  file_name             The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)
+  ch_number             band number (eg. ch03 for band 3)
+  polarization          polarization for which average pulse profile is to be obtained ('XX', 'YY' or 'I' for stokes I)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -b <int>, --bins <int>
+                        number of rows to be picked from .spec file at once (default value is 1000)
+
+
+
+# Copy from ICARUS:
+scp desh@103.79.119.201:/home/desh/Desktop/Hrishi_July2021/pulsar-analysis-package/OutputData/B0809+74/AveragePulseProfile/ch03/ch03_B0809+74_XX.app ~/RRIProject/pulsar-analysis-package/OutputData/B0809+74/AveragePulseProfile/ch03
+scp desh@103.79.119.201:/home/desh/Desktop/Hrishi_July2021/pulsar-analysis-package/OutputData/B0809+74/TimeSeries/ch02/ch02_B0809+74_I.ts ~/RRIProject/pulsar-analysis-package/OutputData/B0809+74/TimeSeries/ch02/
+

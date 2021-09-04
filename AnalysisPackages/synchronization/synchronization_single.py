@@ -76,6 +76,7 @@ def main(file_name, populate_config=True):
     psr_details = file_name[18:42]
     channel_number = int(file_name[15:17])
     plot_graph = False
+    file_name = str(dirname.parent)+'/'+file_name
 
     if populate_config:
         config.read(config_filename)
