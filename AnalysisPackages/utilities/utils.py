@@ -213,7 +213,12 @@ def get_integrated_pulse_stack_filename(channel_number, root_dirname, polarizati
 
 def get_folded_pulse_stack_filename(channel_number, root_dirname, psr):
     return root_dirname + f"OutputData/{psr.psr_name_date_time}/PulseStack/ch0{str(channel_number)}/" + \
-           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + "_folded.pstack"
+           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + "_P3_folded_50bins.pstack"
+
+
+def get_smoothened_folded_pulse_stack_filename(channel_number, root_dirname, psr):
+    return root_dirname + f"OutputData/{psr.psr_name_date_time}/PulseStack/ch0{str(channel_number)}/" + \
+           f"ch0{str(channel_number)}_{psr.psr_name_date_time}" + "_P3_folded_50bins_smooth.pstack"
 
 
 def get_pulse_stack_properties_filename(root_dirname):
