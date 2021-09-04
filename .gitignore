@@ -9,7 +9,14 @@ __pycache__/
 # Manually added directories and files
 *.mbr
 *.spec
+*.dat
+*.prof
+*.app
+*.avs
+*.mask
+*.pstack
 
+*.ts
 # Distribution / packaging
 .idea
 .Python

@@ -31,7 +31,7 @@ class TestPulsarInformationUtility(unittest.TestCase):
         self.assertNotEqual(0, len(config.sections()))  # if this fails, check if config.txt is not empty
 
     def test_time_delay_2_packet_delay(self):
-        self.assertEqual(1000, pulsar_information_utility.time_delay_2_packet_delay(512 / 33000, 33000),
+        self.assertEqual(1000, pulsar_information_utility.time_delay_to_packet_delay(512 / 33000, 33000),
                          "1000 packets with 512 samples in a packet sampled at 33MHz " +
                          "should span across (1000*512/(33*10^3)) milli seconds")
 

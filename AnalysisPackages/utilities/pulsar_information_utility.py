@@ -75,7 +75,7 @@ def read_config(filename):
     return config
 
 
-def time_delay_2_packet_delay(time, sampling_frequency):
+def time_delay_to_packet_delay(time, sampling_frequency):
     return time * (sampling_frequency * 1000 / 512)
 
 
@@ -157,6 +157,7 @@ class PulsarInformationUtility:
         self.dm = float(config.get('pulsar-config', 'dm'))
         self.n_bands = int(config.get('pulsar-config', 'n_bands'))
 
+        self.sigma_threshold = int(config.get('general-config', 'sigma_threshold'))
         self.n_packet_integration = int(config.get('general-config', 'n_packet_integration'))
         self.last_sequence_number = int(config.get('general-config', 'last_sequence_number'))
         self.n_channels = int(config.get('general-config', 'n_channels'))
@@ -165,6 +166,10 @@ class PulsarInformationUtility:
         self.band = None
         self.set_band_specific_from_config()
         print("PulsarUtilityInformation initiated for pulsar: ", self.psr_name_date_time)
+
+    def get_central_frequency(self, channel_number):
+        read_config(self.config_filename)
+        return float(config.get('channel-' + str(channel_number) + '-specific', 'central_frequency'))
 
     def set_band_specific_from_config(self):
         read_config(self.config_filename)
@@ -233,8 +238,8 @@ class PulsarInformationUtility:
 
         print("Skip packets for dispersion delay compensation:")
         for i in range(n_bands):
-            time_delay[i] = time_delay_2_packet_delay(calculate_time_delay(dm, i + 1, ref_band),
-                                                      self.band[i+1].sampling_frequency)
+            time_delay[i] = time_delay_to_packet_delay(calculate_time_delay(dm, i + 1, ref_band),
+                                                       self.band[i + 1].sampling_frequency)
             print("ch:" + str(i + 1) + "	" + str(time_delay[i]))
 
         for i in range(1, n_bands + 1):
