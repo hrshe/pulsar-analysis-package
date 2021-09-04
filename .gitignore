@@ -12,6 +12,9 @@ __pycache__/
 *.dat
 *.prof
 *.app
+*.avs
+*.mask
+*.pstack
 
 *.ts
 # Distribution / packaging
