@@ -25,6 +25,7 @@ The idea here is to use OOPs to build a simple data processing tool for pulsar d
 3. [Pulsar Information Utility](#3-pulsar-information-utility)
 4. [MBR to Dynamic Spectrum](#4-mbr-to-dynamic-spectrum)
 5. [Folded Pulse Spectrum](#5-folded-pulse-spectrum)
+6. [Dispersion Measure Estimation](#6-dispersion-measure-estimation)
 
 ## 1. MBR Data
 The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the 
@@ -211,7 +212,7 @@ python3 -m AnalysisPackages.mbr.get_dynamicspectra ch03_B0834+06_20090725_114903
   <img src="readmeImages/mbr-get_DynamicSpectrum.png"/>
 </p>
 <p align="center">
-  <a>Figure 4.1: Sample output of mbr.get_dynamicspectra</a>
+  <a>Figure 4.2: Sample output of mbr.get_dynamicspectra</a>
   <br><br>
 </p>
 
@@ -231,4 +232,53 @@ Note:
 * Setting the optional plotting parameters (-plotXX, -plotYY, -plotRealXY or -plotImagXY) will plot the selected dynamic spectra
 after processing each part of mbr file. After this, the program will ask during runtime whether to continue plotting for subsequent parts(Y) or not(n). 
 The default is 'n'. That is, if a 'Y' is not provided, plotting will be suspended for subsequent parts.
+
+
 ## 5. Folded Pulse Spectrum
+Individual pulse signals of a pulsar are generally very weak. As a result, they have a low Signal to Noise Ratio (SNR)
+and are hence buried in noise. In order to detect the pulse, we need a to increase the SNR. For repeating signals, this can be achieved by simply
+dividing the data into slices where the duration of each slice is exactly the Period of repetition. These slices
+are then stacked and averaged. The noise in the signal varies randomly near a mean(baseline). Hence, when the slices are 
+averaged, the random noise cancels out and the pulse signal which occur in every slice survive. Therby increasing the SNR. 
+This process is commonly called "folding".
+
+Usage: Run the following command to view help on all optional command line arguments
+```
+python3 -m AnalysisPackages.spec.get_averagepulse -h
+```
+The output describes how to use the command:
+```
+get_averagepulse.py [-h] input_file_name ch_number polarization spec_chunk_size
+
+positional arguments:
+  input_file_name  The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)
+  ch_number        band number (eg. ch03 for band 3)
+  polarization     polarization for which average pulse profile is to be obtained ('XX' or 'YY')
+  spec_chunk_size  number of rows to be picked from .spec file at once (default value is 5000)
+
+optional arguments:
+  -h, --help       show this help message and exit
+```
+
+Example:
+```
+python3 -m AnalysisPackages.spec.get_averagepulse B0834+06_20090725_114903 ch03 XX
+```
+```buildoutcfg
+hello
+```
+
+<p align="center">
+  <img src="readmeImages/mbr-get_DynamicSpectrum.png"/>
+</p>
+<p align="center">
+  <a>Figure 5.1: Folded Spectrum for B0836+06</a>
+  <br><br>
+</p>
+
+As seen in Figure 5.1, the folded pulse spectrum has a high SNR and hence we see a sharp dispersed pulse. Also note that
+the off-pulse region is "smooth". This is because over large time periods, the random noise has canceled out.
+
+Note: .spec file created in [mbr.get_dynamicspectra](#4-mbr-to-dynamic-spectrum) is the input file for this step.
+Hence, make sure that .spec files are generated first
+
