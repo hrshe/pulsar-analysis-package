@@ -10,8 +10,8 @@ Reviewers   : Akhil Jaini, Aleena Baby
 ## Description:
 
 This package was developed during my time at Raman Research Institute while working
-with Prof Avinash Deshpande (*'desh'*). This is an attempt to systematically refactor
-the highly inefficient and unreadable code which I had written during my naive days.
+with Prof Avinash Deshpande (*'desh'*). Currently, refactoring the old code to make it more readable, 
+usable and efficient. Also adding new features
 
 The objective of the 4 month thesis project was to study the radio emissions of a drifter
 pulsar at different bands to better understand the magnetosphere. More information can be found 
@@ -24,7 +24,7 @@ The idea here is to use OOPs to build a simple data processing tool for pulsar d
 2. [Packet Level Synchronization](#2-packet-level-synchronization)
 3. [Pulsar Information Utility](#3-pulsar-information-utility)
 4. [MBR to Dynamic Spectrum](#4-mbr-to-dynamic-spectrum)
-5. [Dynamic Spectrum to Time Series](#5-dynamic-spectrum-to-time-series)
+5. [Folded Pulse Spectrum](#5-folded-pulse-spectrum)
 
 ## 1. MBR Data
 The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the 
@@ -183,14 +183,12 @@ python3 -m AnalysisPackages.mbr.get_dynamicspectra -h
 ```
 Output describes how to use the command:
 ```
-usage: get_dynamicspectra.py input_file_name [-h] [-s] [-plotXX] [-plotYY] [-plotRealXY] [-plotImagXY] [-psrUtil] [-t]
+usage: get_dynamicspectra.py [-h] [-s] [-plotXX] [-plotYY] [-plotRealXY] [-plotImagXY] [-psrUtil] [-t] input_file_name
 
-positional arguments(necessary arguments):
-  Argument:             Functionality:
-  file_name             The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)
+positional arguments:
+  input_file_name       The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)
 
 optional arguments:
-  Arguments:            Functionality:
   -h, --help            show this help message and exit
   -s, --packetSynch     Do packet level synchronization across bands
   -plotXX, --plotXX     plot dynamic spectrum for X polarization after processing each part of mbr file
@@ -199,9 +197,8 @@ optional arguments:
                         plot dynamic spectrum for real part of cross (X.Conjugate(Y)) after processing each part of mbr file
   -plotImagXY, --plotImagXY
                         plot dynamic spectrum for imaginary part of cross (X.Conjugate(Y)) after processing each part of mbr file
-  -psrUtil, --psrUtil   run pulsar_information_utility for populating the config file before computing the dynamic spectra
+  -psrUtil, --psrUtil   run pulsar_information_utility for populating config file before computing the dynamic spectra
   -t, --timer           print time taken to process each part of mbr file
-
 ```
 Not passing the optional argument will simply not execute the corresponding functionality.
 
@@ -209,6 +206,14 @@ In most cases, we will run:
 ```
 python3 -m AnalysisPackages.mbr.get_dynamicspectra ch03_B0834+06_20090725_114903
 ```
+
+<p align="center">
+  <img src="readmeImages/mbr-get_DynamicSpectrum.png"/>
+</p>
+<p align="center">
+  <a>Figure 4.1: Sample output of mbr.get_dynamicspectra</a>
+  <br><br>
+</p>
 
 For obtaining the dynamic spectrum with packet level synchronization across all bands we use the following command. 
 Apart from the synchronization mentioned in [Section 2](#2-packet-level-synchronization), this also includes 
@@ -226,4 +231,4 @@ Note:
 * Setting the optional plotting parameters (-plotXX, -plotYY, -plotRealXY or -plotImagXY) will plot the selected dynamic spectra
 after processing each part of mbr file. After this, the program will ask during runtime whether to continue plotting for subsequent parts(Y) or not(n). 
 The default is 'n'. That is, if a 'Y' is not provided, plotting will be suspended for subsequent parts.
-## 5. Dynamic Spectrum to Time Series 
+## 5. Folded Pulse Spectrum
