@@ -311,7 +311,7 @@ positional arguments:
   polarization     polarization for which average pulse profile is to be obtained ('XX' or 'YY')
 ```
 
-Note: Average spectrum file created in [spec.get_averagepulse](#5-folded-dynamic-spectrum) is the input file for this step.
+Note: Average dynamic spectrum file created in [spec.get_averagepulse](#5-folded-dynamic-spectrum) is the input file for this step.
 Hence, make sure that the average spectrum file is generated first.
 
 ## 7. Pulse Mask
@@ -358,3 +358,51 @@ cases of decompression(like in ch04 of B0809+74 due to low DM and wide pulse)
   <a>Figure 7.2: Draw Pulse Mask Utility (change dev to master in link)</a>
   <br><br>
 </p>
+
+Note: Average dynamic spectrum file created in [spec.get_averagepulse](#5-folded-dynamic-spectrum) is the input file for this step.
+Hence, make sure that the average spectrum file is generated first.
+
+## 7. Pulse Mask
+Time series is obtained by integrating the dynamic spectrum for all frequencies in the band. Prior to this integration, we need to
+de-compress and de-disperse.The command has optional parameters to set/unset decompression. By default, decompression will be done.
+
+Usage: 
+
+```
+python3 -m AnalysisPackages.spec.get_timeseries -h                                                                          ✔ │ took 18s │ pulsar-analysis-package Py │ at 11:47:31 
+usage: get_timeseries.py [-h] [-chunk <int>] [-decomp1 <bool>] [-decomp2 <bool>] [-plot <bool>] input_file_name ch_number polarization [decomp_1_width]
+
+positional arguments:
+  input_file_name       The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)
+  ch_number             band number (eg. ch03 for band 3)
+  polarization          polarization for which average pulse profile is to be obtained ('XX', 'YY' or 'I' for stokes I)
+  decomp_1_width        percentage of signals to be flagged around max signal for decompression by method 1. For details, refer documentation (default value is 40)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -chunk <int>, --spec_chunk_size <int>
+                        number of rows to be picked from .spec file at once (default value is 5000)
+  -decomp1 <bool>, --decompression_method1 <bool>
+                        setting this to False can disable decompression by method 1 (usage: '-decomp1 False' default=False)
+  -decomp2 <bool>, --decompression_method2 <bool>
+                        setting this to False can disable decompression by method 2 (usage: '-decomp2 False' default=False)
+  -plot <bool>, --plot_ds_ts <bool>
+                        plot dynamic spectrum and corresponding time series after processing each chunk (usage: '-plot True' default=False)
+```
+Example:
+```
+python3 -m AnalysisPackages.spec.get_timeseries B0834+06_20090725_114903 ch03 XX 20
+```
+
+<p align="center">
+  <img src="https://github.com/hrshe/pulsar-analysis-package/blob/development/readmeImages/decompression.gif"/>
+</p>
+<p align="center">
+  <a>Figure 7.2: Time series showing the effect of de-compression(change dev to master in link)</a>
+  <br><br>
+</p>
+
+* decompression method 1 -> For each spectrum in the dynamic spectrum, we flag the pulse data by flagging data nearby the point with max intensity.
+  For details refer to section 5.4 "De-compression Method 2 – Detecting spectrum peak and rejecting nearby channels" in [Drifting_Subpulse_Thesis.pdf](Drifting_Subpulse_Thesis.pdf).
+* decompression method 2 -> We flag the pulse data by using the pulse mask. For details refer to section 5.5 "De-compression
+  Method 3 – Pulse Position" in [Drifting_Subpulse_Thesis.pdf](Drifting_Subpulse_Thesis.pdf).
