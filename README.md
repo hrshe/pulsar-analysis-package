@@ -25,7 +25,7 @@ The idea here is to use OOPs to build a simple data processing tool for pulsar d
 3. [Pulsar Information Utility](#3-pulsar-information-utility)
 4. [MBR to Dynamic Spectrum](#4-mbr-to-dynamic-spectrum)
 5. [Folded Pulse Spectrum](#5-folded-pulse-spectrum)
-6. [Dispersion Measure Estimation](#6-dispersion-measure-estimation)
+6. [De-dispersion](#6-de-dispersion)
 
 ## 1. MBR Data
 The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the 
@@ -279,19 +279,18 @@ the off-pulse region is "smooth". This is because over large time periods, the r
 Note: .spec file created in [mbr.get_dynamicspectra](#4-mbr-to-dynamic-spectrum) is the input file for this step.
 Hence, make sure that .spec files are generated before this step.
 
-## 5. Dispersion Measure Estimation
+## 6. De-dispersion
 As the pulsar signal propagates through Interstellar Medium to reach us, it interacts with intervening charged particles 
 and suffers from dispersion. Dispersion occurs because the refractive index of intervening medium is frequency dependent. 
 Lower frequency radiations travel slower than higher frequency radiation. Hence pulses at lower frequency are delayed. 
 As a result, even if the pulsar produces signals at all frequencies at the same time, we would receive higher frequency 
-pulse earlier than the lower frequency pulse.
-The dispersion delay is between signals at two frequencies is given by the formula:
+pulse earlier than the lower frequency pulse. For more information, you can be refer to section 3.6 in [Drifting_Subpulse_Thesis.pdf](Drifting_Subpulse_Thesis.pdf)
 
-![img](http://latex.codecogs.com/svg.latex?%5Ctau_%7Bdelay%7D+%3D+%5Cleft+%28+4.15+%5Ctimes+10%5E%7B6%7D%5Cleft+%28+%5Cfrac%7B1%7D%7B%5Cnu+_%7Blow%7D%5E%7B2%7D%7D+-+%5Cfrac%7B1%7D%7B%5Cnu+_%7Bhigh%7D%5E%7B2%7D%7D%5Cright+%29%5Ctimes+DM+%5Cright+%29+milliseconds)
+It is important that we correct for this delay before proceeding with our analysis. The correct DM is found when the SNR is maximum:
 <p align="center">
-  <img src="readmeImages/mbr-get_DynamicSpectrum.png"/>
+  <img src="readmeImages/de-dispersion.png"/>
 </p>
 <p align="center">
-  <a>Figure 5.1: Folded Spectrum for B0836+06</a>
+  <a>Figure 6.1: DM Estimation for B0836+06</a>
   <br><br>
 </p>
