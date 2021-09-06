@@ -287,9 +287,9 @@ As a result, even if the pulsar produces signals at all frequencies at the same 
 pulse earlier than the lower frequency pulse. For more information, you can be refer to section 3.6 in [Drifting_Subpulse_Thesis.pdf](Drifting_Subpulse_Thesis.pdf)
 
 It is important that we correct for this delay before proceeding with our analysis. The correct DM is found when the SNR is maximum:
-![Alt Text](readmeImages/de-dispersion.png)
+![Alt Text](https://github.com/hrshe/pulsar-analysis-package/blob/development/readmeImages/de-dispersion.gif)
 <p align="center">
-  <img src="readmeImages/de-dispersion.png"/>
+  <img src="https://github.com/hrshe/pulsar-analysis-package/blob/development/readmeImages/de-dispersion.gif"/>
 </p>
 <p align="center">
   <a>Figure 6.1: DM Estimation for B0836+06</a>
