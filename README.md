@@ -27,6 +27,7 @@ The idea here is to use OOPs to build a simple data processing tool for pulsar d
 5. [Folded Dynamic Spectrum](#5-folded-dynamic-spectrum)
 6. [De-dispersion](#6-de-dispersion)
 7. [Pulse Mask](#7-pulse-mask)
+8. [Time Series](#7-time-series)
 
 ## 1. MBR Data
 The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the 
@@ -290,10 +291,10 @@ pulse earlier than the lower frequency pulse. For more information, you can be r
 It is important that we correct for this delay before proceeding with our analysis. The correct DM is found when the SNR is maximum:
 
 <p align="center">
-  <img src="https://github.com/hrshe/pulsar-analysis-package/blob/development/readmeImages/de-dispersion.gif"/>
+  <img src="https://github.com/hrshe/pulsar-analysis-package/blob/master/readmeImages/de-dispersion.gif"/>
 </p>
 <p align="center">
-  <a>Figure 6.1: DM Estimation for B0836+06 (change dev to master in liknk)</a>
+  <a>Figure 6.1: DM Estimation for B0836+06</a>
   <br><br>
 </p>
 
@@ -319,10 +320,10 @@ The folded dynamic spectrum is also used to get a pulse mask. The pulse mask is 
 More on compression and techniques to get rid of it in section 5 of [Drifting_Subpulse_Thesis.pdf](Drifting_Subpulse_Thesis.pdf).
 
 <p align="center">
-  <img src="https://github.com/hrshe/pulsar-analysis-package/blob/development/readmeImages/pulse-mask.gif"/>
+  <img src="https://github.com/hrshe/pulsar-analysis-package/blob/master/readmeImages/pulse-mask.gif"/>
 </p>
 <p align="center">
-  <a>Figure 7.1: Pulse Mask for B0836+06 (change dev to master in link)</a>
+  <a>Figure 7.1: Pulse Mask for B0836+06</a>
   <br><br>
 </p>
 
@@ -352,17 +353,17 @@ A utility was also created to draw pulse mask on average pulse spectrum. This im
 cases of decompression(like in ch04 of B0809+74 due to low DM and wide pulse)
 
 <p align="center">
-  <img src="https://github.com/hrshe/pulsar-analysis-package/blob/development/readmeImages/drawMaskUtil.gif"/>
+  <img src="https://github.com/hrshe/pulsar-analysis-package/blob/master/readmeImages/drawMaskUtil.gif"/>
 </p>
 <p align="center">
-  <a>Figure 7.2: Draw Pulse Mask Utility (change dev to master in link)</a>
+  <a>Figure 7.2: Draw Pulse Mask Utility</a>
   <br><br>
 </p>
 
 Note: Average dynamic spectrum file created in [spec.get_averagepulse](#5-folded-dynamic-spectrum) is the input file for this step.
 Hence, make sure that the average spectrum file is generated first.
 
-## 7. Pulse Mask
+## 7. Time Series
 Time series is obtained by integrating the dynamic spectrum for all frequencies in the band. Prior to this integration, we need to
 de-compress and de-disperse.The command has optional parameters to set/unset decompression. By default, decompression will be done.
 
@@ -395,10 +396,10 @@ python3 -m AnalysisPackages.spec.get_timeseries B0834+06_20090725_114903 ch03 XX
 ```
 
 <p align="center">
-  <img src="https://github.com/hrshe/pulsar-analysis-package/blob/development/readmeImages/decompression.gif"/>
+  <img src="https://github.com/hrshe/pulsar-analysis-package/blob/master/readmeImages/decompression.gif"/>
 </p>
 <p align="center">
-  <a>Figure 7.2: Time series showing the effect of de-compression(change dev to master in link)</a>
+  <a>Figure 7.2: Time series showing the effect of de-compression</a>
   <br><br>
 </p>
 
