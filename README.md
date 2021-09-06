@@ -287,4 +287,11 @@ As a result, even if the pulsar produces signals at all frequencies at the same 
 pulse earlier than the lower frequency pulse.
 The dispersion delay is between signals at two frequencies is given by the formula:
 
-![img](http://latex.codecogs.com/svg.latex?%5Cfrac%7B%5Csigma%7D%7B%5Cmu%7D)
+![img](http://latex.codecogs.com/svg.latex?%5Ctau_%7Bdelay%7D+%3D+%5Cleft+%28+4.15+%5Ctimes+10%5E%7B6%7D%5Cleft+%28+%5Cfrac%7B1%7D%7B%5Cnu+_%7Blow%7D%5E%7B2%7D%7D+-+%5Cfrac%7B1%7D%7B%5Cnu+_%7Bhigh%7D%5E%7B2%7D%7D%5Cright+%29%5Ctimes+DM+%5Cright+%29+milliseconds)
+<p align="center">
+  <img src="readmeImages/mbr-get_DynamicSpectrum.png"/>
+</p>
+<p align="center">
+  <a>Figure 5.1: Folded Spectrum for B0836+06</a>
+  <br><br>
+</p>
