@@ -264,9 +264,6 @@ Example:
 ```
 python3 -m AnalysisPackages.spec.get_averagepulse B0834+06_20090725_114903 ch03 XX
 ```
-```buildoutcfg
-hello
-```
 
 <p align="center">
   <img src="readmeImages/mbr-get_DynamicSpectrum.png"/>
@@ -280,5 +277,14 @@ As seen in Figure 5.1, the folded pulse spectrum has a high SNR and hence we see
 the off-pulse region is "smooth". This is because over large time periods, the random noise has canceled out.
 
 Note: .spec file created in [mbr.get_dynamicspectra](#4-mbr-to-dynamic-spectrum) is the input file for this step.
-Hence, make sure that .spec files are generated first
+Hence, make sure that .spec files are generated before this step.
 
+## 5. Dispersion Measure Estimation
+As the pulsar signal propagates through Interstellar Medium to reach us, it interacts with intervening charged particles 
+and suffers from dispersion. Dispersion occurs because the refractive index of intervening medium is frequency dependent. 
+Lower frequency radiations travel slower than higher frequency radiation. Hence pulses at lower frequency are delayed. 
+As a result, even if the pulsar produces signals at all frequencies at the same time, we would receive higher frequency 
+pulse earlier than the lower frequency pulse.
+The dispersion delay is between signals at two frequencies is given by the formula:
+
+![img](http://latex.codecogs.com/svg.latex?%5Cfrac%7B%5Csigma%7D%7B%5Cmu%7D)
