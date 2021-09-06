@@ -295,3 +295,20 @@ It is important that we correct for this delay before proceeding with our analys
   <a>Figure 6.1: DM Estimation for B0836+06</a>
   <br><br>
 </p>
+
+Note the increased Signal to Noise Ratio (SNR) as we approach the correct Dispersion Measure value.
+Also, the depression on both sides of pulse is due to compression. More on compression in section 5 of [Drifting_Subpulse_Thesis.pdf](Drifting_Subpulse_Thesis.pdf).
+
+Usage: 
+
+```
+python3 -m AnalysisPackages.spec.get_dm B0834+06_20090725_114903 ch03 XX 
+
+positional arguments:
+  input_file_name  The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)
+  ch_number        band number (eg. ch03 for band 3)
+  polarization     polarization for which average pulse profile is to be obtained ('XX' or 'YY')
+```
+
+Note: Average spectrum file created in [spec.get_averagepulse](#5-folded-pulse-spectrum) is the input file for this step.
+Hence, make sure that the average spectrum file is sgenerated first.
