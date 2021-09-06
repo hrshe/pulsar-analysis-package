@@ -10,8 +10,8 @@ Reviewers   : Akhil Jaini, Aleena Baby
 ## Description:
 
 This package was developed during my time at Raman Research Institute while working
-with Prof Avinash Deshpande (*'desh'*). This is an attempt to systematically refactor
-the highly inefficient and unreadable code which I had written during my naive days.
+with Prof Avinash Deshpande (*'desh'*). Currently, refactoring the old code to make it more readable, 
+usable and efficient. Also adding new features
 
 The objective of the 4 month thesis project was to study the radio emissions of a drifter
 pulsar at different bands to better understand the magnetosphere. More information can be found 
@@ -24,7 +24,8 @@ The idea here is to use OOPs to build a simple data processing tool for pulsar d
 2. [Packet Level Synchronization](#2-packet-level-synchronization)
 3. [Pulsar Information Utility](#3-pulsar-information-utility)
 4. [MBR to Dynamic Spectrum](#4-mbr-to-dynamic-spectrum)
-5. [Dynamic Spectrum to Time Series](#5-dynamic-spectrum-to-time-series)
+5. [Folded Pulse Spectrum](#5-folded-pulse-spectrum)
+6. [De-dispersion](#6-de-dispersion)
 
 ## 1. MBR Data
 The multi frequency data were recorded using RRI-GBT Multi-Band Receiver (MBR). The time varying voltage data from the 
@@ -183,14 +184,12 @@ python3 -m AnalysisPackages.mbr.get_dynamicspectra -h
 ```
 Output describes how to use the command:
 ```
-usage: get_dynamicspectra.py input_file_name [-h] [-s] [-plotXX] [-plotYY] [-plotRealXY] [-plotImagXY] [-psrUtil] [-t]
+usage: get_dynamicspectra.py [-h] [-s] [-plotXX] [-plotYY] [-plotRealXY] [-plotImagXY] [-psrUtil] [-t] input_file_name
 
-positional arguments(necessary arguments):
-  Argument:             Functionality:
-  file_name             The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)
+positional arguments:
+  input_file_name       The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)
 
 optional arguments:
-  Arguments:            Functionality:
   -h, --help            show this help message and exit
   -s, --packetSynch     Do packet level synchronization across bands
   -plotXX, --plotXX     plot dynamic spectrum for X polarization after processing each part of mbr file
@@ -199,9 +198,8 @@ optional arguments:
                         plot dynamic spectrum for real part of cross (X.Conjugate(Y)) after processing each part of mbr file
   -plotImagXY, --plotImagXY
                         plot dynamic spectrum for imaginary part of cross (X.Conjugate(Y)) after processing each part of mbr file
-  -psrUtil, --psrUtil   run pulsar_information_utility for populating the config file before computing the dynamic spectra
+  -psrUtil, --psrUtil   run pulsar_information_utility for populating config file before computing the dynamic spectra
   -t, --timer           print time taken to process each part of mbr file
-
 ```
 Not passing the optional argument will simply not execute the corresponding functionality.
 
@@ -209,6 +207,14 @@ In most cases, we will run:
 ```
 python3 -m AnalysisPackages.mbr.get_dynamicspectra ch03_B0834+06_20090725_114903
 ```
+
+<p align="center">
+  <img src="readmeImages/mbr-get_DynamicSpectrum.png"/>
+</p>
+<p align="center">
+  <a>Figure 4.2: Sample output of mbr.get_dynamicspectra</a>
+  <br><br>
+</p>
 
 For obtaining the dynamic spectrum with packet level synchronization across all bands we use the following command. 
 Apart from the synchronization mentioned in [Section 2](#2-packet-level-synchronization), this also includes 
@@ -226,4 +232,66 @@ Note:
 * Setting the optional plotting parameters (-plotXX, -plotYY, -plotRealXY or -plotImagXY) will plot the selected dynamic spectra
 after processing each part of mbr file. After this, the program will ask during runtime whether to continue plotting for subsequent parts(Y) or not(n). 
 The default is 'n'. That is, if a 'Y' is not provided, plotting will be suspended for subsequent parts.
-## 5. Dynamic Spectrum to Time Series 
+
+
+## 5. Folded Pulse Spectrum
+Individual pulse signals of a pulsar are generally very weak. As a result, they have a low Signal to Noise Ratio (SNR)
+and are hence buried in noise. In order to detect the pulse, we need a to increase the SNR. For repeating signals, this can be achieved by simply
+dividing the data into slices where the duration of each slice is exactly the Period of repetition. These slices
+are then stacked and averaged. The noise in the signal varies randomly near a mean(baseline). Hence, when the slices are 
+averaged, the random noise cancels out and the pulse signal which occur in every slice survive. Therby increasing the SNR. 
+This process is commonly called "folding".
+
+Usage: Run the following command to view help on all optional command line arguments
+```
+python3 -m AnalysisPackages.spec.get_averagepulse -h
+```
+The output describes how to use the command:
+```
+get_averagepulse.py [-h] input_file_name ch_number polarization spec_chunk_size
+
+positional arguments:
+  input_file_name  The mbr filename without the sequence number(eg. ch03_B0834+06_20090725_114903)
+  ch_number        band number (eg. ch03 for band 3)
+  polarization     polarization for which average pulse profile is to be obtained ('XX' or 'YY')
+  spec_chunk_size  number of rows to be picked from .spec file at once (default value is 5000)
+
+optional arguments:
+  -h, --help       show this help message and exit
+```
+
+Example:
+```
+python3 -m AnalysisPackages.spec.get_averagepulse B0834+06_20090725_114903 ch03 XX
+```
+
+<p align="center">
+  <img src="readmeImages/mbr-get_DynamicSpectrum.png"/>
+</p>
+<p align="center">
+  <a>Figure 5.1: Folded Spectrum for B0836+06</a>
+  <br><br>
+</p>
+
+As seen in Figure 5.1, the folded pulse spectrum has a high SNR and hence we see a sharp dispersed pulse. Also note that
+the off-pulse region is "smooth". This is because over large time periods, the random noise has canceled out.
+
+Note: .spec file created in [mbr.get_dynamicspectra](#4-mbr-to-dynamic-spectrum) is the input file for this step.
+Hence, make sure that .spec files are generated before this step.
+
+## 6. De-dispersion
+As the pulsar signal propagates through Interstellar Medium to reach us, it interacts with intervening charged particles 
+and suffers from dispersion. Dispersion occurs because the refractive index of intervening medium is frequency dependent. 
+Lower frequency radiations travel slower than higher frequency radiation. Hence pulses at lower frequency are delayed. 
+As a result, even if the pulsar produces signals at all frequencies at the same time, we would receive higher frequency 
+pulse earlier than the lower frequency pulse. For more information, you can be refer to section 3.6 in [Drifting_Subpulse_Thesis.pdf](Drifting_Subpulse_Thesis.pdf)
+
+It is important that we correct for this delay before proceeding with our analysis. The correct DM is found when the SNR is maximum:
+
+<p align="center">
+  <img src="https://github.com/hrshe/pulsar-analysis-package/blob/development/readmeImages/de-dispersion.gif"/>
+</p>
+<p align="center">
+  <a>Figure 6.1: DM Estimation for B0836+06</a>
+  <br><br>
+</p>
